@@ -84,9 +84,6 @@ function changeAdminPassword() {
 
 // Показ формы массового добавления
 function showBulkInput() {
-    // Обновляем активные кнопки
-    updateActiveButton('bulk');
-    
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group fade-in">
             <label>Массовое добавление сделок</label>
@@ -104,9 +101,6 @@ AVAX +15.5%"></textarea>
 
 // Показ формы одиночного добавления
 function showRegularForm() {
-    // Обновляем активные кнопки
-    updateActiveButton('single');
-    
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
             <label>Пара</label>
@@ -137,14 +131,14 @@ function showRegularForm() {
 
 // Управление сделками
 function showTradesList() {
-    // Обновляем активные кнопки
-    updateActiveButton('manage');
-    
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getTradeData(year, month, category) || [];
+    // Получаем сделки из localStorage
+    const key = `trades_${year}_${month}_${category}`;
+    let trades = localStorage.getItem(key);
+    trades = trades ? JSON.parse(trades) : [];
     
     let html = `
         <div class="trade-management fade-in">
@@ -165,8 +159,8 @@ function showTradesList() {
                     <span class="trade-pair">${trade.pair}</span>
                     <span class="trade-result">${trade.result > 0 ? '+' : ''}${trade.result}%</span>
                     <div class="trade-actions">
-                        <button onclick="editTrade(${index})" class="edit-btn">✏️</button>
-                        <button onclick="deleteTrade(${index})" class="delete-btn">❌</button>
+                        <button onclick="editTrade(${index}, '${year}', '${month}', '${category}')" class="edit-btn">✏️</button>
+                        <button onclick="deleteTrade(${index}, '${year}', '${month}', '${category}')" class="delete-btn">❌</button>
                     </div>
                 </div>
             `;
@@ -182,12 +176,10 @@ function showTradesList() {
 }
 
 // Редактирование сделки
-function editTrade(index) {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getTradeData(year, month, category) || [];
+function editTrade(index, year, month, category) {
+    const key = `trades_${year}_${month}_${category}`;
+    let trades = localStorage.getItem(key);
+    trades = trades ? JSON.parse(trades) : [];
     const trade = trades[index];
     
     if (!trade) {
@@ -222,7 +214,7 @@ function editTrade(index) {
                 <input type="text" id="editComment" value="${trade.comment || ''}">
             </div>
             <div class="button-group">
-                <button onclick="saveEditedTrade(${index})" class="save-btn">Сохранить</button>
+                <button onclick="saveEditedTrade(${index}, '${year}', '${month}', '${category}')" class="save-btn">Сохранить</button>
                 <button onclick="showTradesList()" class="cancel-btn">Отмена</button>
             </div>
         </div>
@@ -230,12 +222,10 @@ function editTrade(index) {
 }
 
 // Сохранение отредактированной сделки
-function saveEditedTrade(index) {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getTradeData(year, month, category) || [];
+function saveEditedTrade(index, year, month, category) {
+    const key = `trades_${year}_${month}_${category}`;
+    let trades = localStorage.getItem(key);
+    trades = trades ? JSON.parse(trades) : [];
     
     const pair = document.getElementById('editPair').value;
     const result = parseFloat(document.getElementById('editResult').value);
@@ -255,26 +245,24 @@ function saveEditedTrade(index) {
         comment: comment
     };
     
-    setTradeData(year, month, category, trades);
+    localStorage.setItem(key, JSON.stringify(trades));
     updateContent();
     showNotification('Сделка обновлена');
     showTradesList();
 }
 
 // Удаление сделки
-function deleteTrade(index) {
+function deleteTrade(index, year, month, category) {
     if (!confirm('Вы уверены, что хотите удалить эту сделку?')) {
         return;
     }
     
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
+    const key = `trades_${year}_${month}_${category}`;
+    let trades = localStorage.getItem(key);
+    trades = trades ? JSON.parse(trades) : [];
     
-    const trades = getTradeData(year, month, category) || [];
     trades.splice(index, 1);
-    
-    setTradeData(year, month, category, trades);
+    localStorage.setItem(key, JSON.stringify(trades));
     updateContent();
     showNotification('Сделка удалена');
     showTradesList();
@@ -304,7 +292,13 @@ function addSingleTrade() {
         timestamp: new Date().toISOString()
     };
 
-    addTradeData(year, month, category, trade);
+    // Сохраняем в localStorage
+    const key = `trades_${year}_${month}_${category}`;
+    let trades = localStorage.getItem(key);
+    trades = trades ? JSON.parse(trades) : [];
+    trades.push(trade);
+    localStorage.setItem(key, JSON.stringify(trades));
+
     updateContent();
     showNotification('Сделка добавлена');
     showRegularForm();
@@ -357,53 +351,20 @@ ${totalLoss > 0 ? `Общий убыток: -${totalLoss.toFixed(1)}%` : ''}
 Добавить эти сделки в категорию ${category}?`;
 
     if (confirm(confirmText)) {
-        trades.forEach((trade, index) => {
-            setTimeout(() => {
-                addTradeData(year, month, category, trade);
-                if (index === trades.length - 1) {
-                    updateContent();
-                    document.getElementById('bulkInput').value = '';
-                    showNotification(`Добавлено ${trades.length} сделок`);
-                }
-            }, index * 50);
+        // Сохраняем в localStorage
+        const key = `trades_${year}_${month}_${category}`;
+        let existingTrades = localStorage.getItem(key);
+        existingTrades = existingTrades ? JSON.parse(existingTrades) : [];
+        
+        trades.forEach(trade => {
+            existingTrades.push(trade);
         });
+        
+        localStorage.setItem(key, JSON.stringify(existingTrades));
+        updateContent();
+        document.getElementById('bulkInput').value = '';
+        showNotification(`Добавлено ${trades.length} сделок`);
     }
-}
-
-// Добавляем новую функцию для обновления активных кнопок
-function updateActiveButton(mode) {
-    const buttons = document.querySelectorAll('.mode-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
-    switch(mode) {
-        case 'bulk':
-            document.querySelector('.mode-btn:nth-child(1)').classList.add('active');
-            break;
-        case 'single':
-            document.querySelector('.mode-btn:nth-child(2)').classList.add('active');
-            break;
-        case 'manage':
-            document.querySelector('.mode-btn:nth-child(3)').classList.add('active');
-            break;
-    }
-}
-
-// Вспомогательные функции для работы с данными
-function getTradeData(year, month, category) {
-    const key = `trades_${year}_${month}_${category}`;
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
-}
-
-function setTradeData(year, month, category, trades) {
-    const key = `trades_${year}_${month}_${category}`;
-    localStorage.setItem(key, JSON.stringify(trades));
-}
-
-function addTradeData(year, month, category, trade) {
-    const trades = getTradeData(year, month, category);
-    trades.push(trade);
-    setTradeData(year, month, category, trades);
 }
 
 // Инициализация
