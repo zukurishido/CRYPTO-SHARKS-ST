@@ -82,24 +82,6 @@ function changeAdminPassword() {
     showNotification('Пароль успешно изменен!');
 }
 
-// Функция для обновления активных кнопок
-function updateActiveButton(mode) {
-    const buttons = document.querySelectorAll('.mode-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
-    switch(mode) {
-        case 'bulk':
-            document.querySelector('.mode-btn:nth-child(1)').classList.add('active');
-            break;
-        case 'single':
-            document.querySelector('.mode-btn:nth-child(2)').classList.add('active');
-            break;
-        case 'manage':
-            document.querySelector('.mode-btn:nth-child(3)').classList.add('active');
-            break;
-    }
-}
-
 // Показ формы массового добавления
 function showBulkInput() {
     updateActiveButton('bulk');
@@ -149,18 +131,72 @@ function showRegularForm() {
     `;
 }
 
+// Функция для обновления активных кнопок
+function updateActiveButton(mode) {
+    const buttons = document.querySelectorAll('.mode-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    switch(mode) {
+        case 'bulk':
+            document.querySelector('.mode-btn:nth-child(1)').classList.add('active');
+            break;
+        case 'single':
+            document.querySelector('.mode-btn:nth-child(2)').classList.add('active');
+            break;
+        case 'manage':
+            document.querySelector('.mode-btn:nth-child(3)').classList.add('active');
+            break;
+    }
+}
+
+// Функции работы с данными
+function getTradeData(year, month, category) {
+    try {
+        const key = `trades_${year}_${month}_${category}`;
+        const data = localStorage.getItem(key);
+        if (!data) return [];
+        return JSON.parse(data);
+    } catch (e) {
+        return [];
+    }
+}
+
+function setTradeData(year, month, category, trades) {
+    try {
+        const key = `trades_${year}_${month}_${category}`;
+        localStorage.setItem(key, JSON.stringify(trades));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function addTradeData(year, month, category, trade) {
+    let trades = getTradeData(year, month, category);
+    if (!Array.isArray(trades)) trades = [];
+    trades.push(trade);
+    return setTradeData(year, month, category, trades);
+}
+
 // Управление сделками
 function showTradesList() {
     updateActiveButton('manage');
+    
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getTradeData(year, month, category) || [];
+    let trades = [];
+    try {
+        trades = getTradeData(year, month, category);
+        if (!Array.isArray(trades)) trades = [];
+    } catch (e) {
+        trades = [];
+    }
     
     let html = `
         <div class="trade-management fade-in">
-            <h3>Управление сделками</h3>
+            <h3>Управление сделками (${trades.length})</h3>
             <div class="trades-list">
     `;
     
@@ -199,7 +235,7 @@ function editTrade(index) {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getTradeData(year, month, category) || [];
+    const trades = getTradeData(year, month, category);
     const trade = trades[index];
     
     if (!trade) {
@@ -247,7 +283,7 @@ function saveEditedTrade(index) {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getTradeData(year, month, category) || [];
+    const trades = getTradeData(year, month, category);
     
     const pair = document.getElementById('editPair').value;
     const result = parseFloat(document.getElementById('editResult').value);
@@ -283,7 +319,7 @@ function deleteTrade(index) {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getTradeData(year, month, category) || [];
+    const trades = getTradeData(year, month, category);
     trades.splice(index, 1);
     
     setTradeData(year, month, category, trades);
@@ -382,25 +418,7 @@ ${totalLoss > 0 ? `Общий убыток: -${totalLoss.toFixed(1)}%` : ''}
     }
 }
 
-// Вспомогательные функции для работы с данными
-function getTradeData(year, month, category) {
-    const key = `trades_${year}_${month}_${category}`;
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
-}
-
-function setTradeData(year, month, category, trades) {
-    const key = `trades_${year}_${month}_${category}`;
-    localStorage.setItem(key, JSON.stringify(trades));
-}
-
-function addTradeData(year, month, category, trade) {
-    const trades = getTradeData(year, month, category);
-    trades.push(trade);
-    setTradeData(year, month, category, trades);
-}
-
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
-    initializeAdminPassword();
+   initializeAdminPassword();
 });
