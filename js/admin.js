@@ -130,7 +130,7 @@ function showRegularForm() {
 }
 
 // Управление сделками
-function showTradeManagement() {
+function showTradesList() {
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
@@ -206,7 +206,7 @@ function editTrade(index) {
             </div>
             <div class="button-group">
                 <button onclick="saveEditedTrade(${index})" class="save-btn">Сохранить</button>
-                <button onclick="showTradeManagement()" class="cancel-btn">Отмена</button>
+                <button onclick="showTradesList()" class="cancel-btn">Отмена</button>
             </div>
         </div>
     `;
@@ -241,7 +241,7 @@ function saveEditedTrade(index) {
     setTradeData(year, month, category, trades);
     updateContent();
     showNotification('Сделка обновлена');
-    showTradeManagement();
+    showTradesList();
 }
 
 // Удаление сделки
@@ -260,7 +260,7 @@ function deleteTrade(index) {
     setTradeData(year, month, category, trades);
     updateContent();
     showNotification('Сделка удалена');
-    showTradeManagement();
+    showTradesList();
 }
 
 // Добавление одиночной сделки
