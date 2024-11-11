@@ -1,0 +1,204 @@
+/* Основные анимации появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Анимация прогресс-бара */
+@keyframes fillProgress {
+    from {
+        width: 0;
+        opacity: 0.5;
+    }
+    to {
+        width: var(--progress-width);
+        opacity: 1;
+    }
+}
+
+/* Эффект свечения */
+@keyframes shine {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Пульсация */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Парение */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* Загрузка */
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Классы анимаций */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease forwards;
+}
+
+.pulse {
+    animation: pulse 2s ease infinite;
+}
+
+.float {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Прогресс-бары */
+.progress-animation {
+    animation: fillProgress 1.5s ease-out forwards;
+}
+
+.progress-shine {
+    animation: shine 2s linear infinite;
+}
+
+/* Задержки анимации */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Анимации для карточек сделок */
+.trade-card {
+    opacity: 0;
+}
+
+.trade-card.visible {
+    animation: slideInRight 0.5s ease forwards;
+}
+
+/* Анимации для статистики */
+.stat-box {
+    opacity: 0;
+}
+
+.stat-box.visible {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Hover эффекты */
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
+}
+
+/* Анимации для кнопок */
+.btn-animation {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-animation:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    transition: transform 0.5s ease;
+}
+
+.btn-animation:active:after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Анимация для категорий прогресс-бара */
+.profit .progress-bar {
+    animation: fillProgress 1.5s ease-out forwards,
+              shine 2s linear infinite;
+}
+
+.loss .progress-bar {
+    animation: fillProgress 1.5s ease-out forwards,
+              shine 2s linear infinite;
+}
+
+.neutral .progress-bar {
+    animation: fillProgress 1.5s ease-out forwards,
+              shine 2s linear infinite;
+}
