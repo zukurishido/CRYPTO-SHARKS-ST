@@ -1,83 +1,67 @@
-/* Админ панель */
 .admin-panel {
     position: fixed;
     right: -400px;
     top: 0;
     width: 400px;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(30, 41, 59, 0.98);
     backdrop-filter: blur(10px);
-    padding: 20px;
+    padding: 1.5rem;
     transition: transform 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
-    border-left: 1px solid rgba(0, 255, 157, 0.2);
 }
 
 .admin-panel.visible {
     transform: translateX(-400px);
 }
 
-/* Шапка админ-панели */
 .admin-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid rgba(0, 255, 157, 0.2);
 }
 
 .admin-header h2 {
     color: var(--primary);
-    font-size: 1.5em;
+    font-size: 1.5rem;
 }
 
-.admin-controls {
-    display: flex;
-    gap: 10px;
+.close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s ease;
 }
 
-/* Текущие настройки */
-.current-settings {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.2);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-.current-setting {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 0.9em;
-}
-
-.setting-label {
+.close-btn:hover {
     color: var(--primary);
 }
 
-/* Переключатели режимов */
 .mode-switcher {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .mode-btn {
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
+    padding: 0.75rem;
+    background: var(--dark);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .mode-btn:hover {
-    background: rgba(0, 255, 157, 0.1);
     border-color: var(--primary);
 }
 
@@ -86,162 +70,75 @@
     color: black;
 }
 
-/* Форма */
 .admin-form {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
 }
 
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
     color: var(--primary);
 }
 
-input, select, textarea {
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
     width: 100%;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
+    padding: 0.75rem;
+    background: var(--dark);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 5px;
-    font-size: 0.9em;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-
-#bulkInput {
+.admin-form textarea {
+    min-height: 200px;
     font-family: monospace;
-    min-height: 300px;
-    line-height: 1.4;
-    font-size: 14px;
     resize: vertical;
 }
 
-/* Кнопки */
-.button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.add-btn, .save-btn {
+.add-btn {
+    width: 100%;
+    padding: 0.75rem;
     background: var(--primary);
     color: black;
     border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    cursor: pointer;
+    border-radius: 0.5rem;
     font-weight: bold;
+    cursor: pointer;
     transition: all 0.3s ease;
-    width: 100%;
 }
 
-.add-btn:hover, .save-btn:hover {
+.add-btn:hover {
+    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
 }
 
-.password-btn {
-    background: rgba(255, 193, 7, 0.2);
-    color: #ffc107;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.logout-btn {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.close-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.edit-btn, .delete-btn {
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
-}
-
-.edit-btn {
-    background: rgba(0, 255, 157, 0.2);
-    color: var(--primary);
-}
-
-.delete-btn {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-}
-
-/* Список сделок */
-.trades-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.category-section h3 {
-    color: var(--primary);
-    margin-bottom: 10px;
-}
-
-.trade-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-.trade-actions {
-    display: flex;
-    gap: 10px;
-}
-
-/* Уведомления */
 .notification {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    border-radius: 8px;
-    background: var(--primary);
-    color: black;
-    font-weight: bold;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    background: var(--card);
+    color: white;
     z-index: 1100;
-    animation: slideIn 0.3s ease forwards;
+    animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+    border-left: 4px solid var(--primary);
 }
 
 .notification.error {
-    background: #ef4444;
-    color: white;
+    border-left: 4px solid #ff4444;
 }
 
 @keyframes slideIn {
@@ -252,16 +149,5 @@ input:focus, select:focus, textarea:focus {
     to {
         transform: translateX(0);
         opacity: 1;
-    }
-}
-
-.notification.fade-out {
-    animation: slideOut 0.3s ease forwards;
-}
-
-@keyframes slideOut {
-    to {
-        transform: translateX(100%);
-        opacity: 0;
     }
 }
