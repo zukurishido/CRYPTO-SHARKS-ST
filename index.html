@@ -3,111 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRYPTO SHARKS - Итоги</title>
-    <!-- Подключаем библиотеки -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Стили -->
+    <title>CRYPTO SHARKS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
 </head>
-<body>
-    <div class="container">
-        <header class="header" id="header">
+<body class="bg-[#0f172a]">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="header">
             <div class="logo-section">
-                <h1 class="title">CRYPTO SHARKS</h1>
+                <h1 id="crypto-sharks" class="title">CRYPTO SHARKS</h1>
             </div>
-            <button onclick="toggleAdmin()" id="adminBtn" class="admin-btn">
+            <button id="adminButton" class="admin-btn">
                 Админ панель
             </button>
         </header>
 
-        <div class="filters" id="filters">
-            <select id="yearSelect" onchange="updateContent()">
-                <option value="2023">2023</option>
-                <option value="2024" selected>2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-                <option value="2030">2030</option>
-            </select>
-            <select id="monthSelect" onchange="updateContent()">
-                <option value="1">Январь</option>
-                <option value="2">Февраль</option>
-                <option value="3">Март</option>
-                <option value="4">Апрель</option>
-                <option value="5">Май</option>
-                <option value="6">Июнь</option>
-                <option value="7">Июль</option>
-                <option value="8">Август</option>
-                <option value="9">Сентябрь</option>
-                <option value="10" selected>Октябрь</option>
-                <option value="11">Ноябрь</option>
-                <option value="12">Декабрь</option>
-            </select>
-            <select id="categorySelect" onchange="updateContent()">
-                <option value="SPOT">SPOT</option>
-                <option value="FUTURES">FUTURES</option>
-                <option value="DeFi">DeFi</option>
-            </select>
-        </div>
+        <!-- Main Content -->
+        <main>
+            <!-- Filters -->
+            <div id="filters" class="filters">
+                <select id="yearSelect" class="filter-select">
+                    <option value="2023">2023</option>
+                    <option value="2024" selected>2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
 
-        <div id="mainContent">
-            <div class="summary-stats" id="summaryStats">
-                <!-- Сводная статистика будет добавлена через JavaScript -->
+                <select id="monthSelect" class="filter-select">
+                    <option value="Январь">Январь</option>
+                    <option value="Февраль">Февраль</option>
+                    <option value="Март">Март</option>
+                    <option value="Апрель">Апрель</option>
+                    <option value="Май">Май</option>
+                    <option value="Июнь">Июнь</option>
+                    <option value="Июль">Июль</option>
+                    <option value="Август">Август</option>
+                    <option value="Сентябрь">Сентябрь</option>
+                    <option value="Октябрь">Октябрь</option>
+                    <option value="Ноябрь">Ноябрь</option>
+                    <option value="Декабрь">Декабрь</option>
+                </select>
+
+                <select id="categorySelect" class="filter-select">
+                    <option value="SPOT">SPOT</option>
+                    <option value="FUTURES">FUTURES</option>
+                    <option value="DeFi">DeFi</option>
+                </select>
             </div>
 
-            <div class="stats-container" id="statsContainer">
-                <div class="trades-grid" id="tradesGrid">
-                    <!-- Сделки будут добавлены через JavaScript -->
+            <!-- Summary Stats -->
+            <div id="summaryStats" class="summary-stats">
+                <!-- Заполняется через JavaScript -->
+            </div>
+
+            <!-- Trades Container -->
+            <div id="statsContainer" class="stats-container">
+                <div id="tradesGrid" class="trades-grid">
+                    <!-- Заполняется через JavaScript -->
                 </div>
             </div>
+        </main>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-header">
+            <h2>Админ панель</h2>
+            <div class="admin-controls">
+                <button class="password-btn" title="Изменить пароль">
+                    <i class="fas fa-key"></i>
+                </button>
+                <button class="logout-btn" title="Выйти">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <button id="closeAdmin" class="close-btn" title="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="admin-panel" id="adminPanel">
-            <div class="admin-header">
-                <h2>Админ панель</h2>
-                <div class="admin-controls">
-                    <button onclick="changeAdminPassword()" class="password-btn">
-                        Изменить пароль
-                    </button>
-                    <button onclick="logoutAdmin()" class="logout-btn">
-                        Выйти
-                    </button>
-                    <button onclick="toggleAdmin()" class="close-btn">✕</button>
-                </div>
+        <div id="currentSettings" class="current-settings">
+            <div class="current-setting">
+                <span class="setting-label">Год:</span>
+                <span class="setting-value">2024</span>
             </div>
+            <div class="current-setting">
+                <span class="setting-label">Месяц:</span>
+                <span class="setting-value">Январь</span>
+            </div>
+            <div class="current-setting">
+                <span class="setting-label">Категория:</span>
+                <span class="setting-value">SPOT</span>
+            </div>
+        </div>
 
-            <div id="currentSettings" class="current-settings">
-                <!-- Текущие настройки будут добавлены через JavaScript -->
-            </div>
+        <div class="mode-switcher">
+            <button class="mode-btn active" data-mode="bulk">
+                Массовое добавление
+            </button>
+            <button class="mode-btn" data-mode="single">
+                Одиночное добавление
+            </button>
+            <button class="mode-btn" data-mode="manage">
+                Управление сделками
+            </button>
+        </div>
 
-            <div class="mode-switcher">
-                <button onclick="showBulkInput()" class="mode-btn active">
-                    Массовое добавление
-                </button>
-                <button onclick="showRegularForm()" class="mode-btn">
-                    Одиночное добавление
-                </button>
-                <button onclick="showTradesList()" class="mode-btn">
-                    Управление сделками
-                </button>
-            </div>
-
-            <div class="admin-form">
-                <!-- Форма будет добавлена через JavaScript -->
-            </div>
+        <div class="admin-form">
+            <!-- Form content will be dynamically inserted here -->
         </div>
     </div>
 
-    <!-- Скрипты -->
-    <script>
-        // Инициализация иконок Lucide
-        lucide.createIcons();
-    </script>
+    <!-- Scripts -->
     <script src="js/data.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
