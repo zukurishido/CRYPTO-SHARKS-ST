@@ -2,11 +2,17 @@
 let isAdminPanelVisible = false;
 let isAuthenticated = false;
 
+// Проверка пароля
+function checkAdminPassword(password) {
+    // Захешированный пароль "Cr5pt0Sh@rks2024#AdminP@nel"
+    const validHash = "Q3I1cHQwU2hAcmtzMjAyNCNBZG1pblBAb" + "mVs";
+    return btoa(password) === validHash;
+}
+
 // Инициализация админ-панели
 function initializeAdminPanel() {
     const adminButton = document.getElementById('adminButton');
     const closeAdmin = document.getElementById('closeAdmin');
-    const adminPanel = document.getElementById('adminPanel');
 
     adminButton.addEventListener('click', () => {
         if (!isAuthenticated) {
@@ -21,21 +27,27 @@ function initializeAdminPanel() {
     });
 }
 
-// Показ/скрытие админ-панели
+// Переключение видимости админ-панели
 function toggleAdminPanel() {
     const adminPanel = document.getElementById('adminPanel');
     isAdminPanelVisible = !isAdminPanelVisible;
     adminPanel.classList.toggle('visible');
+    
+    if (isAdminPanelVisible && isAuthenticated) {
+        showBulkInput();
+    }
 }
 
-// Форма входа
+// Показ формы входа
 function showLoginForm() {
-    const adminPanel = document.getElementById('adminPanel');
     const form = document.querySelector('.admin-form');
-    
     form.innerHTML = `
         <div class="input-group">
-            <input type="password" id="passwordInput" placeholder="Введите пароль" class="admin-input">
+            <input type="password" 
+                   id="passwordInput" 
+                   placeholder="Введите пароль" 
+                   class="admin-input"
+                   onkeypress="if(event.key === 'Enter') login()">
             <button onclick="login()" class="add-btn">Войти</button>
         </div>
     `;
@@ -46,7 +58,7 @@ function showLoginForm() {
 // Вход в админ-панель
 function login() {
     const password = document.getElementById('passwordInput').value;
-    if (password === 'admin123') { // Замените на реальный пароль
+    if (checkAdminPassword(password)) {
         isAuthenticated = true;
         showBulkInput();
         showNotification('Успешный вход', 'success');
@@ -74,7 +86,6 @@ SPOT:🚀
             <button onclick="processBulkTrades()" class="add-btn">Добавить сделки</button>
         </div>
     `;
-
     updateModeBtns('bulk');
 }
 
@@ -95,7 +106,6 @@ function showRegularForm() {
         </div>
         <button onclick="processSingleTrade()" class="add-btn">Добавить сделку</button>
     `;
-
     updateModeBtns('single');
 }
 
@@ -178,7 +188,7 @@ function showTradesList() {
                     </div>
                     <div class="trade-actions">
                         <button onclick="editTrade('${trade.id}')" class="edit-btn">✎</button>
-                        <button onclick="deleteTrade('${trade.id}')" class="delete-btn">✕</button>
+                        <button onclick="confirmDelete('${trade.id}')" class="delete-btn">✕</button>
                     </div>
                 </div>
             `;
@@ -188,6 +198,23 @@ function showTradesList() {
     html += '</div>';
     document.querySelector('.admin-form').innerHTML = html;
     updateModeBtns('manage');
+}
+
+// Подтверждение удаления
+function confirmDelete(tradeId) {
+    if (confirm('Удалить эту сделку?')) {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+        const category = document.getElementById('categorySelect').value;
+
+        if (deleteTradeData(year, month, category, tradeId)) {
+            showNotification('Сделка удалена', 'success');
+            updateContent();
+            showTradesList();
+        } else {
+            showNotification('Ошибка при удалении', 'error');
+        }
+    }
 }
 
 // Редактирование сделки
@@ -209,34 +236,25 @@ function editTrade(tradeId) {
             };
             
             if (updateTradeData(year, month, category, tradeId, updatedTrade)) {
+                showNotification('Сделка обновлена', 'success');
                 updateContent();
                 showTradesList();
-                showNotification('Сделка обновлена', 'success');
+            } else {
+                showNotification('Ошибка при обновлении', 'error');
             }
         }
     }
 }
 
-// Удаление сделки
-function deleteTrade(tradeId) {
-    if (confirm('Удалить эту сделку?')) {
-        const year = document.getElementById('yearSelect').value;
-        const month = document.getElementById('monthSelect').value;
-        const category = document.getElementById('categorySelect').value;
-        
-        if (deleteTradeData(year, month, category, tradeId)) {
-            updateContent();
-            showTradesList();
-            showNotification('Сделка удалена', 'success');
-        }
-    }
-}
-
-// Обновление активной кнопки режима
+// Обновление активных кнопок режима
 function updateModeBtns(activeMode) {
     const btns = document.querySelectorAll('.mode-btn');
     btns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === activeMode);
+        if (btn.getAttribute('onclick').includes(activeMode)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
     });
 }
 
