@@ -1,4 +1,28 @@
-// Парсинг сделок с поддержкой различных форматов
+// Структура данных
+let data = {
+    '2024': {
+        'Январь': {
+            'SPOT': { trades: [] },
+            'FUTURES': { trades: [] },
+            'DeFi': { trades: [] }
+        }
+    }
+};
+
+// Загрузка данных из localStorage
+function loadData() {
+    const savedData = localStorage.getItem('cryptoSharksData');
+    if (savedData) {
+        data = JSON.parse(savedData);
+    }
+}
+
+// Сохранение данных в localStorage
+function saveData() {
+    localStorage.setItem('cryptoSharksData', JSON.stringify(data));
+}
+
+// Улучшенный парсинг сделок
 function parseTrades(text) {
     const lines = text.split('\n').filter(line => line.trim());
     let currentCategory = '';
@@ -8,7 +32,7 @@ function parseTrades(text) {
         // Очищаем строку от лишних символов
         const cleanLine = line.trim().replace(/["""'']/g, '');
 
-        // Определение категории (нечувствительно к регистру и доп. символам)
+        // Определение категории (поддержка различных форматов)
         if (cleanLine.match(/DEFI|ДЕФИ|DEFI:|ДЕФИ:|DEFI🚀|DEFI */i)) {
             currentCategory = 'DeFi';
             return;
@@ -20,31 +44,35 @@ function parseTrades(text) {
             return;
         }
 
-        // Различные паттерны для сделок
+        // Паттерны для различных форматов записи сделок
         const patterns = [
-            // Стандартный формат: #BTC +50% или #BTC -30%
+            // #BTC +50% или #BTC -30%
             /[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             
-            // Формат без #: BTC +50% или BTC -30%
+            // BTC +50% или BTC -30%
             /(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             
-            // Формат с номером: 1. BTC +50% или 1) BTC -30%
+            // 1. BTC +50% или 1) BTC -30%
             /(?:\d+[\.)]\s*)[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             
-            // Формат через дефис или точку: BTC - +50% или BTC . -30%
+            // BTC - +50% или BTC . -30%
             /(\w+)\s*[-\.]\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             
-            // Формат без пробелов: BTC+50% или BTC-30%
-            /(\w+)([-+])(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i
+            // BTC+50% или BTC-30%
+            /(\w+)([-+])(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
+            
+            // Общий формат для чисел и символов
+            /(\w+)[^\w\s]*\s*([-+])?(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i
         ];
 
-        // Проверяем каждый паттерн
+        // Проверка каждого паттерна
         let matched = false;
         for (const pattern of patterns) {
             const match = cleanLine.match(pattern);
             if (match && currentCategory) {
                 const [_, symbol, sign, value, leverage] = match;
-                const result = (sign === '+' ? 1 : -1) * parseFloat(value);
+                let result = parseFloat(value);
+                result = (sign === '-' || cleanLine.includes('-')) ? -result : result;
                 
                 // Очищаем название пары от лишних символов
                 const cleanSymbol = symbol.replace(/[^A-Za-z0-9]/g, '');
@@ -64,17 +92,21 @@ function parseTrades(text) {
         }
 
         // Дополнительная проверка для особых форматов
-        if (!matched && currentCategory) {
-            // Формат "пара результат": BTC 50% или BTC 30%
-            const simpleMatch = cleanLine.match(/(\w+)\s+(\d+\.?\d*)%/i);
-            if (simpleMatch) {
-                const [_, symbol, value] = simpleMatch;
+        if (!matched && currentCategory && cleanLine.length > 0) {
+            // Пытаемся извлечь любые числа и символы
+            const numberMatch = cleanLine.match(/(\d+\.?\d*)/);
+            const symbolMatch = cleanLine.match(/([A-Za-z]+)/);
+            
+            if (numberMatch && symbolMatch) {
+                const value = parseFloat(numberMatch[1]);
+                const symbol = symbolMatch[1];
+                
                 trades.push({
                     id: Date.now() + Math.random(),
-                    pair: symbol.replace(/[^A-Za-z0-9]/g, ''),
-                    result: parseFloat(value),
+                    pair: symbol,
+                    result: value,
                     leverage: '',
-                    status: parseFloat(value) > 0 ? 'profit' : 'loss',
+                    status: value > 0 ? 'profit' : 'loss',
                     category: currentCategory,
                     timestamp: new Date().toISOString()
                 });
@@ -85,33 +117,111 @@ function parseTrades(text) {
     return trades;
 }
 
-// Тестирование парсинга различных форматов
-function testParsing(text) {
-    const trades = parseTrades(text);
-    console.log('Распознанные сделки:', trades);
-    return trades.length > 0;
+// Добавление сделок
+function addTradeData(year, month, category, trades) {
+    // Создаем структуру если её нет
+    if (!data[year]) data[year] = {};
+    if (!data[year][month]) data[year][month] = {};
+    if (!data[year][month][category]) data[year][month][category] = { trades: [] };
+
+    // Добавляем сделки
+    if (Array.isArray(trades)) {
+        data[year][month][category].trades.push(...trades);
+    } else {
+        data[year][month][category].trades.push(trades);
+    }
+    
+    saveData();
 }
 
-// Примеры форматов, которые теперь распознаются:
-/*
-DEFI:
-#BTC +50%
-BTC -30%
-1. ETH +25%
-2) SOL -15%
-BTC - +40%
-ETH . -20%
-DOT+35%
-AVAX-25%
-BNB 45%
+// Обновление существующей сделки
+function updateTradeData(year, month, category, tradeId, updatedData) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        const index = trades.findIndex(t => t.id === tradeId);
+        
+        if (index !== -1) {
+            trades[index] = { ...trades[index], ...updatedData };
+            saveData();
+            return true;
+        }
+    }
+    return false;
+}
 
-FUTURES:
-#BTC +50% (10x)
-BTC -30% (5x)
-1. ETH +25% (3x)
-2) SOL -15% (2x)
+// Удаление сделки
+function deleteTradeData(year, month, category, tradeId) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        data[year][month][category].trades = trades.filter(t => t.id !== tradeId);
+        saveData();
+        return true;
+    }
+    return false;
+}
 
-SPOT:
-#BTC +50%
-BTC -30%
-*/
+// Получение данных за период
+function getPeriodData(year, month, category) {
+    return data[year]?.[month]?.[category]?.trades || [];
+}
+
+// Расчет статистики
+function calculateStats(trades) {
+    let totalProfit = 0;
+    let totalLoss = 0;
+    let profitCount = 0;
+    let lossCount = 0;
+    
+    trades.forEach(trade => {
+        if (trade.result > 0) {
+            totalProfit += trade.result;
+            profitCount++;
+        } else if (trade.result < 0) {
+            totalLoss += Math.abs(trade.result);
+            lossCount++;
+        }
+    });
+
+    return {
+        totalTrades: trades.length,
+        profitTrades: profitCount,
+        lossTrades: lossCount,
+        totalProfit: totalProfit.toFixed(1),
+        totalLoss: totalLoss.toFixed(1),
+        winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0
+    };
+}
+
+// Экспорт данных
+function exportData() {
+    return {
+        data: JSON.stringify(data),
+        timestamp: new Date().toISOString()
+    };
+}
+
+// Импорт данных
+function importData(jsonData) {
+    try {
+        const importedData = JSON.parse(jsonData);
+        data = importedData;
+        saveData();
+        return true;
+    } catch (error) {
+        console.error('Ошибка импорта данных:', error);
+        return false;
+    }
+}
+
+// Очистка данных за период
+function clearPeriodData(year, month, category) {
+    if (data[year]?.[month]?.[category]) {
+        data[year][month][category].trades = [];
+        saveData();
+        return true;
+    }
+    return false;
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadData);
