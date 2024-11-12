@@ -1,234 +1,130 @@
 :root {
     --primary: #00ff9d;
     --primary-dark: #00cc7d;
-    --dark: #1a1a1a;
-    --profit: #00ff9d;
-    --loss: #ff4444;
-    --neutral: #ffa500;
-    --background: #0f172a;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    --dark: #0f172a;
+    --card: #1e293b;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, var(--dark), var(--background));
+    background-color: var(--dark);
     color: white;
+    font-family: system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    line-height: 1.5;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Шапка */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
-    margin-bottom: 40px;
+    margin-bottom: 2rem;
 }
 
 .title {
-    font-size: 2.5em;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-size: 2.5rem;
     color: var(--primary);
     font-weight: bold;
-    background: linear-gradient(to right, var(--primary), #fff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
 }
 
 .admin-btn {
     background: var(--primary);
     color: black;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
     font-weight: bold;
+    border: none;
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .admin-btn:hover {
+    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
 }
 
-/* Фильтры */
 .filters {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 40px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 1rem;
 }
 
-select {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--primary);
+.filter-select {
+    background: var(--dark);
     color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 1em;
+    padding: 0.75rem;
+    border: 1px solid var(--primary);
+    border-radius: 0.5rem;
+    width: 100%;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-select:hover {
-    background: rgba(0, 255, 157, 0.1);
-}
-
-/* Статистика */
 .summary-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
-.stat-box {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeIn 0.5s forwards;
-}
-
-.stat-value {
-    font-size: 2em;
-    margin: 10px 0;
-    font-weight: bold;
-}
-
-/* Карточки сделок */
 .stats-container {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 30px;
-    backdrop-filter: blur(10px);
+    background: var(--card);
+    border-radius: 1rem;
+    padding: 1.5rem;
 }
 
 .trades-grid {
     display: grid;
-    gap: 20px;
+    gap: 1rem;
 }
 
 .trade-card {
+    background: var(--dark);
+    border-radius: 0.5rem;
+    padding: 1rem;
     position: relative;
-    background: rgba(30, 41, 59, 0.5);
-    border-radius: 12px;
-    padding: 24px;
-    opacity: 0;
-    transform: translateX(-20px);
-    animation: slideIn 0.5s forwards;
-}
-
-.trade-card.visible {
-    opacity: 1;
-    transform: translateX(0);
+    overflow: hidden;
 }
 
 .trade-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 0.5rem;
 }
 
-.trade-pair {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.2em;
-    font-weight: bold;
+.profit .trade-result {
+    color: var(--primary);
 }
 
-.trade-result {
-    font-size: 1.2em;
-    font-weight: bold;
+.loss .trade-result {
+    color: #ff4444;
 }
 
-/* Прогресс бары */
 .progress-container {
-    height: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+    height: 0.25rem;
     overflow: hidden;
-    margin-top: 10px;
 }
 
 .progress-bar {
     height: 100%;
-    width: 0;
-    position: relative;
-    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 1s ease-in-out;
 }
 
 .profit .progress-bar {
-    background: linear-gradient(90deg, var(--profit), #00cc7d);
+    background: var(--primary);
 }
 
 .loss .progress-bar {
-    background: linear-gradient(90deg, var(--loss), #cc0000);
+    background: #ff4444;
 }
 
-.neutral .progress-bar {
-    background: linear-gradient(90deg, var(--neutral), #cc8400);
-}
-
-.progress-shine {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
-    animation: shine 2s infinite;
-}
-
-/* Цвета статусов */
-.profit .trade-result { color: var(--profit); }
-.loss .trade-result { color: var(--loss); }
-.neutral .trade-result { color: var(--neutral); }
-
-/* Анимации */
-@keyframes shine {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(100%); }
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+@media (max-width: 768px) {
+    .filters,
+    .summary-stats {
+        grid-template-columns: 1fr;
     }
 }
-
-@keyframes slideIn {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-  }
