@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRYPTO SHARKS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -17,60 +16,53 @@
             <div class="logo-section">
                 <h1 id="crypto-sharks" class="title">CRYPTO SHARKS</h1>
             </div>
-            <button id="adminButton" class="admin-btn">
-                Админ панель
-            </button>
+            <button id="adminButton" class="admin-btn">Админ панель</button>
         </header>
 
-        <!-- Main Content -->
-        <main>
-            <!-- Filters -->
-            <div id="filters" class="filters">
-                <select id="yearSelect" class="filter-select">
-                    <option value="2023">2023</option>
-                    <option value="2024" selected>2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
-                    <option value="2029">2029</option>
-                    <option value="2030">2030</option>
-                </select>
+        <!-- Filters -->
+        <div id="filters" class="filters">
+            <select id="yearSelect" class="filter-select">
+                <option value="2023">2023</option>
+                <option value="2024" selected>2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
+            </select>
+            <select id="monthSelect" class="filter-select">
+                <option value="Январь">Январь</option>
+                <option value="Февраль">Февраль</option>
+                <option value="Март">Март</option>
+                <option value="Апрель">Апрель</option>
+                <option value="Май">Май</option>
+                <option value="Июнь">Июнь</option>
+                <option value="Июль">Июль</option>
+                <option value="Август">Август</option>
+                <option value="Сентябрь">Сентябрь</option>
+                <option value="Октябрь">Октябрь</option>
+                <option value="Ноябрь">Ноябрь</option>
+                <option value="Декабрь">Декабрь</option>
+            </select>
+            <select id="categorySelect" class="filter-select">
+                <option value="SPOT">SPOT</option>
+                <option value="FUTURES">FUTURES</option>
+                <option value="DeFi">DeFi</option>
+            </select>
+        </div>
 
-                <select id="monthSelect" class="filter-select">
-                    <option value="Январь">Январь</option>
-                    <option value="Февраль">Февраль</option>
-                    <option value="Март">Март</option>
-                    <option value="Апрель">Апрель</option>
-                    <option value="Май">Май</option>
-                    <option value="Июнь">Июнь</option>
-                    <option value="Июль">Июль</option>
-                    <option value="Август">Август</option>
-                    <option value="Сентябрь">Сентябрь</option>
-                    <option value="Октябрь">Октябрь</option>
-                    <option value="Ноябрь">Ноябрь</option>
-                    <option value="Декабрь">Декабрь</option>
-                </select>
+        <!-- Summary Stats -->
+        <div id="summaryStats" class="summary-stats">
+            <!-- Заполняется через JavaScript -->
+        </div>
 
-                <select id="categorySelect" class="filter-select">
-                    <option value="SPOT">SPOT</option>
-                    <option value="FUTURES">FUTURES</option>
-                    <option value="DeFi">DeFi</option>
-                </select>
-            </div>
-
-            <!-- Summary Stats -->
-            <div id="summaryStats" class="summary-stats">
+        <!-- Trades Container -->
+        <div id="statsContainer" class="stats-container">
+            <div id="tradesGrid" class="trades-grid">
                 <!-- Заполняется через JavaScript -->
             </div>
-
-            <!-- Trades Container -->
-            <div id="statsContainer" class="stats-container">
-                <div id="tradesGrid" class="trades-grid">
-                    <!-- Заполняется через JavaScript -->
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
     <!-- Admin Panel -->
@@ -78,51 +70,27 @@
         <div class="admin-header">
             <h2>Админ панель</h2>
             <div class="admin-controls">
-                <button class="password-btn" title="Изменить пароль">
-                    <i class="fas fa-key"></i>
-                </button>
-                <button class="logout-btn" title="Выйти">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-                <button id="closeAdmin" class="close-btn" title="Закрыть">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="currentSettings" class="current-settings">
-            <div class="current-setting">
-                <span class="setting-label">Год:</span>
-                <span class="setting-value">2024</span>
-            </div>
-            <div class="current-setting">
-                <span class="setting-label">Месяц:</span>
-                <span class="setting-value">Январь</span>
-            </div>
-            <div class="current-setting">
-                <span class="setting-label">Категория:</span>
-                <span class="setting-value">SPOT</span>
+                <button class="close-btn" id="closeAdmin">✕</button>
             </div>
         </div>
 
         <div class="mode-switcher">
-            <button class="mode-btn active" data-mode="bulk">
+            <button class="mode-btn active" onclick="showBulkInput()">
                 Массовое добавление
             </button>
-            <button class="mode-btn" data-mode="single">
+            <button class="mode-btn" onclick="showRegularForm()">
                 Одиночное добавление
             </button>
-            <button class="mode-btn" data-mode="manage">
+            <button class="mode-btn" onclick="showTradesList()">
                 Управление сделками
             </button>
         </div>
 
         <div class="admin-form">
-            <!-- Form content will be dynamically inserted here -->
+            <!-- Форма будет добавляться динамически -->
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="js/data.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
