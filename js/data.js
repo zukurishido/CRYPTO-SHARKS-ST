@@ -1,36 +1,115 @@
-// Функции для работы с данными
-function getTradeData(year, month, category) {
-    const key = `trades_${year}_${month}_${category}`;
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
+// Структура данных
+let data = {
+    '2024': {
+        'Январь': {
+            'SPOT': { trades: [] },
+            'FUTURES': { trades: [] },
+            'DeFi': { trades: [] }
+        }
+    }
+};
+
+// Загрузка данных
+function loadData() {
+    const savedData = localStorage.getItem('cryptoSharksData');
+    if (savedData) {
+        data = JSON.parse(savedData);
+    }
 }
 
-function setTradeData(year, month, category, trades) {
-    const key = `trades_${year}_${month}_${category}`;
-    localStorage.setItem(key, JSON.stringify(trades));
+// Сохранение данных
+function saveData() {
+    localStorage.setItem('cryptoSharksData', JSON.stringify(data));
 }
 
-function addTradeData(year, month, category, trade) {
-    const trades = getTradeData(year, month, category);
-    trades.push(trade);
-    setTradeData(year, month, category, trades);
-}
-
-// Обновление контента
-function updateContent() {
-    updateSummaryStats();
-    updateTradesGrid();
-    updateAdminPanelInfo();
-}
-
-// Обновление статистики
-function updateSummaryStats() {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
+// Парсинг сделок
+function parseTrades(text) {
+    const lines = text.split('\n').filter(line => line.trim());
+    let currentCategory = '';
+    let trades = [];
     
-    const trades = getTradeData(year, month, category);
+    lines.forEach(line => {
+        // Определение категории
+        if (line.includes('DEFI:') || line.includes('DeFi:')) {
+            currentCategory = 'DeFi';
+            return;
+        } else if (line.includes('FUTURES:')) {
+            currentCategory = 'FUTURES';
+            return;
+        } else if (line.includes('SPOT:')) {
+            currentCategory = 'SPOT';
+            return;
+        }
+
+        // Парсинг одиночной сделки
+        const tradeMatch = line.match(/[\d.]+\.?#?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/);
+        
+        if (tradeMatch && currentCategory) {
+            const [_, symbol, sign, value, leverage] = tradeMatch;
+            const result = (sign === '+' ? 1 : -1) * parseFloat(value);
+            
+            trades.push({
+                id: Date.now() + Math.random(),
+                pair: symbol,
+                result: result,
+                leverage: leverage || '',
+                status: result > 0 ? 'profit' : 'loss',
+                category: currentCategory
+            });
+        }
+    });
+
+    return trades;
+}
+
+// Добавление сделок
+function addTradeData(year, month, category, trades) {
+    if (!data[year]) data[year] = {};
+    if (!data[year][month]) data[year][month] = {};
+    if (!data[year][month][category]) data[year][month][category] = { trades: [] };
+
+    if (Array.isArray(trades)) {
+        data[year][month][category].trades.push(...trades);
+    } else {
+        data[year][month][category].trades.push(trades);
+    }
     
+    saveData();
+}
+
+// Обновление сделки
+function updateTradeData(year, month, category, tradeId, updatedData) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        const index = trades.findIndex(t => t.id === tradeId);
+        
+        if (index !== -1) {
+            trades[index] = { ...trades[index], ...updatedData };
+            saveData();
+            return true;
+        }
+    }
+    return false;
+}
+
+// Удаление сделки
+function deleteTradeData(year, month, category, tradeId) {
+    if (data[year]?.[month]?.[category]) {
+        const trades = data[year][month][category].trades;
+        data[year][month][category].trades = trades.filter(t => t.id !== tradeId);
+        saveData();
+        return true;
+    }
+    return false;
+}
+
+// Получение данных за период
+function getPeriodData(year, month, category) {
+    return data[year]?.[month]?.[category]?.trades || [];
+}
+
+// Расчет статистики
+function calculateStats(trades) {
     let totalProfit = 0;
     let totalLoss = 0;
     let profitCount = 0;
@@ -46,105 +125,15 @@ function updateSummaryStats() {
         }
     });
 
-    const successRate = trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0;
-
-    const summaryStats = document.getElementById('summaryStats');
-    if (summaryStats) {
-        summaryStats.innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-card total">
-                    <div class="stat-value">${trades.length}</div>
-                    <div class="stat-label">Всего сделок</div>
-                </div>
-                <div class="stat-card profit">
-                    <div class="stat-value">+${totalProfit.toFixed(1)}%</div>
-                    <div class="stat-label">Прибыль</div>
-                </div>
-                <div class="stat-card loss">
-                    <div class="stat-value">-${totalLoss.toFixed(1)}%</div>
-                    <div class="stat-label">Убыток</div>
-                </div>
-                <div class="stat-card profit">
-                    <div class="stat-value">${profitCount}</div>
-                    <div class="stat-label">Прибыльных</div>
-                </div>
-                <div class="stat-card loss">
-                    <div class="stat-value">${lossCount}</div>
-                    <div class="stat-label">Убыточных</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${successRate}%</div>
-                    <div class="stat-label">Винрейт</div>
-                </div>
-            </div>
-        `;
-    }
+    return {
+        totalTrades: trades.length,
+        profitTrades: profitCount,
+        lossTrades: lossCount,
+        totalProfit: totalProfit.toFixed(1),
+        totalLoss: totalLoss.toFixed(1),
+        winRate: trades.length > 0 ? ((profitCount / trades.length) * 100).toFixed(1) : 0
+    };
 }
 
-// Обновление сетки сделок
-function updateTradesGrid() {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getTradeData(year, month, category);
-    
-    let html = '';
-    trades.forEach(trade => {
-        html += `
-            <div class="trade-card ${trade.status}">
-                <div class="trade-header">
-                    <div class="trade-info">
-                        <span class="trade-pair">${trade.pair}</span>
-                        <span class="trade-result ${trade.result > 0 ? 'profit' : 'loss'}">${trade.result > 0 ? '+' : ''}${trade.result}%</span>
-                    </div>
-                </div>
-                ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
-            </div>
-        `;
-    });
-    
-    const tradesGrid = document.getElementById('tradesGrid');
-    if (tradesGrid) {
-        tradesGrid.innerHTML = trades.length ? html : '<p class="no-trades">Нет сделок для отображения</p>';
-    }
-}
-
-// Обновление информации в админ панели
-function updateAdminPanelInfo() {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const currentSettings = document.getElementById('currentSettings');
-    if (currentSettings) {
-        currentSettings.innerHTML = `
-            <div class="current-setting">
-                <span class="setting-label">Год:</span>
-                <span>${year}</span>
-            </div>
-            <div class="current-setting">
-                <span class="setting-label">Месяц:</span>
-                <span>${getMonthName(month)}</span>
-            </div>
-            <div class="current-setting">
-                <span class="setting-label">Категория:</span>
-                <span>${category}</span>
-            </div>
-        `;
-    }
-}
-
-function getMonthName(month) {
-    const months = [
-        'Январь', 'Февраль', 'Март', 'Апрель',
-        'Май', 'Июнь', 'Июль', 'Август',
-        'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
-    return months[parseInt(month) - 1];
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    updateContent();
-});
+// Инициализация
+document.addEventListener('DOMContentLoaded', loadData);
