@@ -3,6 +3,14 @@
     --primary-dark: #00cc7d;
     --dark: #0f172a;
     --card: #1e293b;
+    --profit: #00ff9d;
+    --loss: #ff4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -10,6 +18,7 @@ body {
     background-color: var(--dark);
     color: white;
     min-height: 100vh;
+    line-height: 1.5;
 }
 
 /* Header */
@@ -24,6 +33,7 @@ body {
     font-size: 2.5rem;
     font-weight: bold;
     color: var(--primary);
+    text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
 }
 
 .admin-btn {
@@ -40,6 +50,7 @@ body {
 .admin-btn:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
 }
 
 /* Filters */
@@ -51,16 +62,28 @@ body {
     padding: 1.5rem;
     border-radius: 1rem;
     margin-bottom: 2rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
 }
 
 .filter-select {
     width: 100%;
     padding: 0.75rem;
     background: var(--dark);
-    border: 1px solid var(--primary);
+    border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
     border-radius: 0.5rem;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+    border-color: var(--primary);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
 }
 
 /* Stats */
@@ -75,12 +98,19 @@ body {
     background: var(--card);
     padding: 1.5rem;
     border-radius: 1rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
 }
 
 .stat-box h3 {
-    font-size: 1.1rem;
     color: #8892a0;
     margin-bottom: 0.5rem;
+    font-size: 1rem;
 }
 
 .stat-value {
@@ -88,54 +118,131 @@ body {
     font-weight: bold;
 }
 
-.profit { color: var(--primary); }
-.loss { color: #ff4d4d; }
+.profit {
+    color: var(--profit);
+}
+
+.loss {
+    color: var(--loss);
+}
 
 /* Trades Grid */
+.stats-container {
+    background: var(--card);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
+}
+
 .trades-grid {
     display: grid;
     gap: 1rem;
 }
 
 .trade-card {
-    background: var(--card);
+    background: rgba(15, 23, 42, 0.6);
     border-radius: 0.5rem;
     padding: 1rem;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(0, 255, 157, 0.1);
+    transition: all 0.3s ease;
+}
+
+.trade-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.1);
 }
 
 .trade-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .trade-pair {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-weight: 500;
+}
+
+.trade-result {
+    font-weight: bold;
 }
 
 .progress-container {
-    height: 4px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+    border-radius: 0.25rem;
+    height: 4px;
     overflow: hidden;
 }
 
 .progress-bar {
     height: 100%;
     transition: width 1s ease-in-out;
+    position: relative;
 }
 
-.profit .progress-bar { background: var(--primary); }
-.loss .progress-bar { background: #ff4d4d; }
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: shine 2s infinite;
+}
 
+.profit .progress-bar {
+    background: var(--profit);
+}
+
+.loss .progress-bar {
+    background: var(--loss);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .filters,
     .summary-stats {
         grid-template-columns: 1fr;
     }
+
+    .stat-box {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animations */
+@keyframes shine {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.no-trades {
+    text-align: center;
+    padding: 2rem;
+    color: #8892a0;
+}
+
+/* Utils */
+.hidden {
+    display: none !important;
 }
