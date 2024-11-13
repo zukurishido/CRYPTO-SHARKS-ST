@@ -15,15 +15,15 @@ function updateContent() {
 function updateSummaryStats(stats) {
     const summaryStats = document.getElementById('summaryStats');
     summaryStats.innerHTML = `
-        <div class="stat-box fade-in delay-1">
+        <div class="stat-box fade-in">
             <h3>Всего сделок</h3>
             <div class="stat-value">${stats.totalTrades}</div>
         </div>
-        <div class="stat-box fade-in delay-2">
+        <div class="stat-box fade-in">
             <h3>Прибыльных</h3>
             <div class="stat-value profit">+${stats.totalProfit}%</div>
         </div>
-        <div class="stat-box fade-in delay-3">
+        <div class="stat-box fade-in">
             <h3>Убыточных</h3>
             <div class="stat-value loss">-${stats.totalLoss}%</div>
         </div>
@@ -67,78 +67,56 @@ function updateTradesGrid(trades) {
                     <div class="progress-shine"></div>
                 </div>
             </div>
-            ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
-            ${window.isAuthenticated ? `
-                <div class="trade-actions admin-control">
-                    <button onclick="editTrade('${trade.id}')" class="edit-btn">✎</button>
-                    <button onclick="confirmDelete('${trade.id}')" class="delete-btn">✕</button>
-                </div>
-            ` : ''}
         `;
 
         container.appendChild(card);
     });
 }
 
-// Подтверждение удаления
-function confirmDelete(tradeId) {
-    if (!window.isAuthenticated) {
-        showNotification('Доступ запрещен', 'error');
-        return;
-    }
-
-    if (confirm('Удалить эту сделку?')) {
-        const year = document.getElementById('yearSelect').value;
-        const month = document.getElementById('monthSelect').value;
-        const category = document.getElementById('categorySelect').value;
-
-        if (deleteTradeData(year, month, category, tradeId)) {
-            showNotification('Сделка удалена', 'success');
-            updateContent();
-        }
-    }
-}
-
-// Редактирование сделки
-function editTrade(tradeId) {
-    if (!window.isAuthenticated) {
-        showNotification('Доступ запрещен', 'error');
-        return;
-    }
-
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getPeriodData(year, month, category);
-    const trade = trades.find(t => t.id === tradeId);
-    
-    if (trade) {
-        const newResult = prompt('Введите новый результат:', trade.result);
-        if (newResult !== null) {
-            const updatedTrade = {
-                ...trade,
-                result: parseFloat(newResult),
-                status: parseFloat(newResult) > 0 ? 'profit' : 'loss'
-            };
-            
-            if (updateTradeData(year, month, category, tradeId, updatedTrade)) {
-                showNotification('Сделка обновлена', 'success');
-                updateContent();
-            }
-        }
-    }
-}
-
 // Инициализация фильтров
 function initializeFilters() {
-    const selects = ['yearSelect', 'monthSelect', 'categorySelect'];
-    selects.forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (select) {
-            select.addEventListener('change', updateContent);
-        }
+    // Установка текущего года по умолчанию
+    const yearSelect = document.getElementById('yearSelect');
+    if (yearSelect) {
+        const currentYear = new Date().getFullYear().toString();
+        yearSelect.value = currentYear;
+    }
+
+    // Установка текущего месяца по умолчанию
+    const monthSelect = document.getElementById('monthSelect');
+    if (monthSelect) {
+        const months = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        const currentMonth = months[new Date().getMonth()];
+        monthSelect.value = currentMonth;
+    }
+
+    // Добавление обработчиков событий для фильтров
+    const selects = document.querySelectorAll('.filter-select');
+    selects.forEach(select => {
+        select.addEventListener('change', () => {
+            updateContent();
+            
+            // Добавляем анимацию обновления
+            const statsContainer = document.getElementById('statsContainer');
+            if (statsContainer) {
+                statsContainer.classList.add('updating');
+                setTimeout(() => {
+                    statsContainer.classList.remove('updating');
+                }, 500);
+            }
+        });
     });
+}
+
+// Вспомогательная функция для форматирования чисел
+function formatNumber(number) {
+    return new Intl.NumberFormat('ru-RU', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    }).format(number);
 }
 
 // Инициализация приложения
@@ -146,7 +124,15 @@ function initializeApp() {
     loadData();
     initializeFilters();
     updateContent();
+
+    // Добавляем обработчик для обновления при изменении данных
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'cryptoSharksData') {
+            loadData();
+            updateContent();
+        }
+    });
 }
 
-// Запуск при загрузке страницы
+// Запуск приложения при загрузке страницы
 document.addEventListener('DOMContentLoaded', initializeApp);
