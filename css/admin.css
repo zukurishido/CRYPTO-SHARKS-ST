@@ -1,3 +1,4 @@
+/* Основные стили админ-панели */
 .admin-panel {
     position: fixed;
     right: -400px;
@@ -17,17 +18,18 @@
     transform: translateX(-400px);
 }
 
+/* Заголовок админ-панели */
 .admin-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
     border-bottom: 1px solid rgba(0, 255, 157, 0.2);
 }
 
 .admin-header h2 {
-    color: var(--primary);
+    color: #00ff9d;
     font-size: 1.5rem;
     font-weight: bold;
 }
@@ -43,89 +45,120 @@
 }
 
 .close-btn:hover {
-    color: var(--primary);
+    color: #00ff9d;
 }
 
+/* Режимы работы */
 .mode-switcher {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
 }
 
 .mode-btn {
-    padding: 0.75rem;
+    padding: 10px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.9rem;
+    text-align: center;
 }
 
 .mode-btn:hover {
     background: rgba(0, 255, 157, 0.1);
-    border-color: var(--primary);
+    border-color: #00ff9d;
 }
 
 .mode-btn.active {
-    background: var(--primary);
+    background: #00ff9d;
     color: black;
-    font-weight: 500;
+    border-color: transparent;
 }
 
+/* Формы */
 .admin-form {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+    border-radius: 8px;
+    padding: 20px;
 }
 
 .input-group {
-    margin-bottom: 1rem;
+    margin-bottom: 15px;
 }
 
 .input-group label {
     display: block;
-    color: var(--primary);
-    margin-bottom: 0.5rem;
+    color: #00ff9d;
+    margin-bottom: 8px;
     font-size: 0.9rem;
 }
 
 .admin-form input,
 .admin-form textarea {
     width: 100%;
-    padding: 0.75rem;
+    padding: 12px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
 }
 
 .admin-form input:focus,
 .admin-form textarea:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: #00ff9d;
+    box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
 }
 
 .admin-form textarea {
     min-height: 200px;
     font-family: monospace;
     resize: vertical;
+    line-height: 1.5;
 }
 
-/* Trades List */
+/* Кнопки */
+.add-btn {
+    width: 100%;
+    padding: 12px;
+    background: #00ff9d;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.add-btn:hover {
+    background: #00cc7d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
+}
+
+/* Список сделок */
 .trades-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .trade-item {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
-    border-radius: 0.5rem;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -134,20 +167,20 @@
 .trade-content {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 10px;
 }
 
 .trade-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
 .delete-btn {
-    padding: 0.5rem 1rem;
+    padding: 8px 16px;
     background: rgba(255, 68, 68, 0.1);
     color: #ff4444;
     border: 1px solid rgba(255, 68, 68, 0.2);
-    border-radius: 0.5rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.9rem;
@@ -155,45 +188,33 @@
 
 .delete-btn:hover {
     background: rgba(255, 68, 68, 0.2);
-}
-
-.add-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--primary);
-    color: black;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.add-btn:hover {
-    background: var(--primary-dark);
     transform: translateY(-2px);
 }
 
-/* Notifications */
+/* Уведомления */
 .notification {
     position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
     color: white;
     z-index: 1100;
     animation: slideIn 0.3s ease;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .notification.success {
-    background: var(--primary);
+    background: #00ff9d;
+    color: black;
 }
 
 .notification.error {
-    background: var(--loss);
+    background: #ff4444;
 }
 
+/* Анимации */
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -205,7 +226,78 @@
     }
 }
 
-/* Admin Only Elements */
+/* Кастомный скроллбар */
+.admin-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.3);
+    border-radius: 3px;
+}
+
+.admin-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.5);
+}
+
+/* Остальные стили */
+.form-content {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 500px) {
+    .admin-panel {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+/* Стили для полей ввода в темной теме */
+.admin-input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 157, 0.2);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: #00ff9d;
+    box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
+}
+
+/* Стили для текста-подсказки */
+::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Стили для заблокированных элементов */
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Стили для режима модерации */
 .admin-only {
     display: none;
 }
