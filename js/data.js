@@ -12,31 +12,32 @@ let data = {
 // Загрузка данных
 function loadData() {
     try {
-        const savedData = localStorage.getItem('cryptoSharksData');
-        if (savedData) {
-            data = JSON.parse(savedData);
-        }
+        // Попытка загрузить общие данные
+        const commonData = localStorage.getItem('commonCryptoData');
+        
+        if (commonData) {
+            data = JSON.parse(commonData);
+        } else {
+            // Если общих данных нет, создаем структуру
+            const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+            const months = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
 
-        // Инициализация всех годов и месяцев
-        const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
-        const months = [
-            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
+            data = {};
 
-        // Создаём структуру для всех периодов
-        years.forEach(year => {
-            if (!data[year]) data[year] = {};
-            months.forEach(month => {
-                if (!data[year][month]) {
+            years.forEach(year => {
+                data[year] = {};
+                months.forEach(month => {
                     data[year][month] = {
                         'SPOT': { trades: [] },
                         'FUTURES': { trades: [] },
                         'DeFi': { trades: [] }
                     };
-                }
+                });
             });
-        });
+        }
 
         saveData();
     } catch (error) {
@@ -48,7 +49,7 @@ function loadData() {
 // Сохранение данных
 function saveData() {
     try {
-        localStorage.setItem('cryptoSharksData', JSON.stringify(data));
+        localStorage.setItem('commonCryptoData', JSON.stringify(data));
         return true;
     } catch (error) {
         console.error('Ошибка сохранения:', error);
