@@ -1,4 +1,4 @@
-// Глобальное состояние
+// Состояние админ-панели
 window.isAuthenticated = false;
 let isAdminPanelVisible = false;
 
@@ -18,9 +18,6 @@ function initializeAdminPanel() {
     closeAdmin.addEventListener('click', () => {
         toggleAdminPanel();
     });
-
-    // Проверяем элементы управления при загрузке
-    updateControlsVisibility();
 }
 
 // Переключение видимости админ-панели
@@ -51,7 +48,7 @@ function showLoginForm() {
     toggleAdminPanel();
 }
 
-// Проверка пароля и вход
+// Вход в админ-панель
 function login() {
     const password = document.getElementById('passwordInput').value;
     // Захешированный пароль "Cr5pt0Sh@rks2024#AdminP@nel"
@@ -61,24 +58,13 @@ function login() {
         window.isAuthenticated = true;
         showBulkInput();
         showNotification('Успешный вход', 'success');
-        updateControlsVisibility();
     } else {
         showNotification('Неверный пароль', 'error');
     }
 }
 
-// Обновление видимости элементов управления
-function updateControlsVisibility() {
-    const adminControls = document.querySelectorAll('.admin-control');
-    adminControls.forEach(control => {
-        control.style.display = window.isAuthenticated ? 'flex' : 'none';
-    });
-}
-
 // Показ формы массового добавления
 function showBulkInput() {
-    if (!window.isAuthenticated) return;
-
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
             <label>Массовое добавление сделок</label>
@@ -101,8 +87,6 @@ SPOT:🚀
 
 // Показ формы одиночного добавления
 function showRegularForm() {
-    if (!window.isAuthenticated) return;
-
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
             <label>Пара</label>
@@ -121,13 +105,58 @@ function showRegularForm() {
     updateModeBtns('single');
 }
 
+// Показ списка сделок для управления
+function showTradesList() {
+    const year = document.getElementById('yearSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    const category = document.getElementById('categorySelect').value;
+    
+    const trades = getPeriodData(year, month, category);
+    let html = '<div class="trades-list">';
+    
+    if (trades.length === 0) {
+        html += '<p>Нет сделок за выбранный период</p>';
+    } else {
+        trades.forEach((trade) => {
+            html += `
+                <div class="trade-item ${trade.status}">
+                    <div class="trade-content">
+                        <div class="trade-pair">#${trade.pair}</div>
+                        <div class="trade-result">
+                            ${trade.result > 0 ? '+' : ''}${trade.result}% 
+                            ${trade.leverage ? `(${trade.leverage})` : ''}
+                        </div>
+                    </div>
+                    <div class="trade-actions">
+                        <button onclick="confirmDelete('${trade.id}')" class="delete-btn">Удалить</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    html += '</div>';
+    document.querySelector('.admin-form').innerHTML = html;
+    updateModeBtns('manage');
+}
+
+// Подтверждение удаления
+function confirmDelete(tradeId) {
+    if (confirm('Удалить эту сделку?')) {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+        const category = document.getElementById('categorySelect').value;
+
+        if (deleteTradeData(year, month, category, tradeId)) {
+            showNotification('Сделка удалена', 'success');
+            showTradesList();
+            updateContent();
+        }
+    }
+}
+
 // Обработка массового добавления
 function processBulkTrades() {
-    if (!window.isAuthenticated) {
-        showNotification('Доступ запрещен', 'error');
-        return;
-    }
-
     const text = document.getElementById('bulkInput').value;
     const trades = parseTrades(text);
     
@@ -149,11 +178,6 @@ function processBulkTrades() {
 
 // Обработка одиночного добавления
 function processSingleTrade() {
-    if (!window.isAuthenticated) {
-        showNotification('Доступ запрещен', 'error');
-        return;
-    }
-
     const pair = document.getElementById('pairInput').value;
     const result = parseFloat(document.getElementById('resultInput').value);
     const leverage = document.getElementById('leverageInput').value;
