@@ -23,7 +23,7 @@
         <div id="filters" class="filters">
             <select id="yearSelect" class="filter-select">
                 <option value="2023">2023</option>
-                <option value="2024" selected>2024</option>
+                <option value="2024">2024</option>
                 <option value="2025">2025</option>
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
@@ -69,31 +69,20 @@
     <div id="adminPanel" class="admin-panel">
         <div class="admin-header">
             <h2>Админ панель</h2>
-            <div class="admin-controls admin-control">
-                <button id="closeAdmin" class="close-btn">✕</button>
-            </div>
+            <button id="closeAdmin" class="close-btn">✕</button>
         </div>
 
-        <!-- Режимы работы (видны только админу) -->
-        <div class="mode-switcher admin-control">
-            <button class="mode-btn active" onclick="showBulkInput()">
-                Массовое добавление
-            </button>
-            <button class="mode-btn" onclick="showRegularForm()">
-                Одиночное добавление
-            </button>
-            <button class="mode-btn" onclick="showTradesList()">
-                Управление сделками
-            </button>
+        <div class="mode-switcher">
+            <button class="mode-btn" onclick="showBulkInput()">Массовое добавление</button>
+            <button class="mode-btn" onclick="showRegularForm()">Одиночное добавление</button>
+            <button class="mode-btn" onclick="showTradesList()">Управление сделками</button>
         </div>
 
-        <!-- Форма админ-панели -->
         <div class="admin-form">
             <!-- Заполняется через JavaScript -->
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="js/data.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
