@@ -1,13 +1,6 @@
-// Состояние админ-панели
+// Глобальное состояние
+window.isAuthenticated = false;
 let isAdminPanelVisible = false;
-let isAuthenticated = false;
-
-// Проверка пароля
-function checkAdminPassword(password) {
-    // Захешированный пароль "Cr5pt0Sh@rks2024#AdminP@nel"
-    const validHash = "Q3I1cHQwU2hAcmtzMjAyNCNBZG1pblBAb" + "mVs";
-    return btoa(password) === validHash;
-}
 
 // Инициализация админ-панели
 function initializeAdminPanel() {
@@ -15,7 +8,7 @@ function initializeAdminPanel() {
     const closeAdmin = document.getElementById('closeAdmin');
 
     adminButton.addEventListener('click', () => {
-        if (!isAuthenticated) {
+        if (!window.isAuthenticated) {
             showLoginForm();
         } else {
             toggleAdminPanel();
@@ -25,6 +18,9 @@ function initializeAdminPanel() {
     closeAdmin.addEventListener('click', () => {
         toggleAdminPanel();
     });
+
+    // Проверяем элементы управления при загрузке
+    updateControlsVisibility();
 }
 
 // Переключение видимости админ-панели
@@ -33,7 +29,7 @@ function toggleAdminPanel() {
     isAdminPanelVisible = !isAdminPanelVisible;
     adminPanel.classList.toggle('visible');
     
-    if (isAdminPanelVisible && isAuthenticated) {
+    if (isAdminPanelVisible && window.isAuthenticated) {
         showBulkInput();
     }
 }
@@ -55,20 +51,34 @@ function showLoginForm() {
     toggleAdminPanel();
 }
 
-// Вход в админ-панель
+// Проверка пароля и вход
 function login() {
     const password = document.getElementById('passwordInput').value;
-    if (checkAdminPassword(password)) {
-        isAuthenticated = true;
+    // Захешированный пароль "Cr5pt0Sh@rks2024#AdminP@nel"
+    const validHash = "Q3I1cHQwU2hAcmtzMjAyNCNBZG1pblBAb" + "mVs";
+    
+    if (btoa(password) === validHash) {
+        window.isAuthenticated = true;
         showBulkInput();
         showNotification('Успешный вход', 'success');
+        updateControlsVisibility();
     } else {
         showNotification('Неверный пароль', 'error');
     }
 }
 
+// Обновление видимости элементов управления
+function updateControlsVisibility() {
+    const adminControls = document.querySelectorAll('.admin-control');
+    adminControls.forEach(control => {
+        control.style.display = window.isAuthenticated ? 'flex' : 'none';
+    });
+}
+
 // Показ формы массового добавления
 function showBulkInput() {
+    if (!window.isAuthenticated) return;
+
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
             <label>Массовое добавление сделок</label>
@@ -91,6 +101,8 @@ SPOT:🚀
 
 // Показ формы одиночного добавления
 function showRegularForm() {
+    if (!window.isAuthenticated) return;
+
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
             <label>Пара</label>
@@ -111,6 +123,11 @@ function showRegularForm() {
 
 // Обработка массового добавления
 function processBulkTrades() {
+    if (!window.isAuthenticated) {
+        showNotification('Доступ запрещен', 'error');
+        return;
+    }
+
     const text = document.getElementById('bulkInput').value;
     const trades = parseTrades(text);
     
@@ -123,15 +140,20 @@ function processBulkTrades() {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    addTradeData(year, month, category, trades);
-    updateContent();
-    
-    document.getElementById('bulkInput').value = '';
-    showNotification(`Добавлено ${trades.length} сделок`, 'success');
+    if (addTradeData(year, month, category, trades)) {
+        document.getElementById('bulkInput').value = '';
+        showNotification(`Добавлено ${trades.length} сделок`, 'success');
+        updateContent();
+    }
 }
 
 // Обработка одиночного добавления
 function processSingleTrade() {
+    if (!window.isAuthenticated) {
+        showNotification('Доступ запрещен', 'error');
+        return;
+    }
+
     const pair = document.getElementById('pairInput').value;
     const result = parseFloat(document.getElementById('resultInput').value);
     const leverage = document.getElementById('leverageInput').value;
@@ -145,7 +167,7 @@ function processSingleTrade() {
         id: Date.now(),
         pair: pair,
         result: result,
-        leverage: leverage ? `${leverage}` : '',
+        leverage: leverage ? leverage : '',
         status: result > 0 ? 'profit' : 'loss'
     };
 
@@ -153,96 +175,14 @@ function processSingleTrade() {
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    addTradeData(year, month, category, trade);
-    updateContent();
-
-    // Очистка формы
-    document.getElementById('pairInput').value = '';
-    document.getElementById('resultInput').value = '';
-    document.getElementById('leverageInput').value = '';
-    
-    showNotification('Сделка добавлена', 'success');
-}
-
-// Показ списка сделок
-function showTradesList() {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getPeriodData(year, month, category);
-    let html = '<div class="trades-list">';
-    
-    if (trades.length === 0) {
-        html += '<p>Нет сделок за выбранный период</p>';
-    } else {
-        trades.forEach((trade) => {
-            html += `
-                <div class="trade-item ${trade.status}">
-                    <div class="trade-content">
-                        <div class="trade-pair">#${trade.pair}</div>
-                        <div class="trade-result">
-                            ${trade.result > 0 ? '+' : ''}${trade.result}% 
-                            ${trade.leverage ? `(${trade.leverage})` : ''}
-                        </div>
-                    </div>
-                    <div class="trade-actions">
-                        <button onclick="editTrade('${trade.id}')" class="edit-btn">✎</button>
-                        <button onclick="confirmDelete('${trade.id}')" class="delete-btn">✕</button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-    
-    html += '</div>';
-    document.querySelector('.admin-form').innerHTML = html;
-    updateModeBtns('manage');
-}
-
-// Подтверждение удаления
-function confirmDelete(tradeId) {
-    if (confirm('Удалить эту сделку?')) {
-        const year = document.getElementById('yearSelect').value;
-        const month = document.getElementById('monthSelect').value;
-        const category = document.getElementById('categorySelect').value;
-
-        if (deleteTradeData(year, month, category, tradeId)) {
-            showNotification('Сделка удалена', 'success');
-            updateContent();
-            showTradesList();
-        } else {
-            showNotification('Ошибка при удалении', 'error');
-        }
-    }
-}
-
-// Редактирование сделки
-function editTrade(tradeId) {
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-    
-    const trades = getPeriodData(year, month, category);
-    const trade = trades.find(t => t.id === tradeId);
-    
-    if (trade) {
-        const newResult = prompt('Введите новый результат:', trade.result);
-        if (newResult !== null) {
-            const updatedTrade = {
-                ...trade,
-                result: parseFloat(newResult),
-                status: parseFloat(newResult) > 0 ? 'profit' : 'loss'
-            };
-            
-            if (updateTradeData(year, month, category, tradeId, updatedTrade)) {
-                showNotification('Сделка обновлена', 'success');
-                updateContent();
-                showTradesList();
-            } else {
-                showNotification('Ошибка при обновлении', 'error');
-            }
-        }
+    if (addTradeData(year, month, category, trade)) {
+        // Очистка формы
+        document.getElementById('pairInput').value = '';
+        document.getElementById('resultInput').value = '';
+        document.getElementById('leverageInput').value = '';
+        
+        showNotification('Сделка добавлена', 'success');
+        updateContent();
     }
 }
 
