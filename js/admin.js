@@ -80,7 +80,14 @@ function showBulkInput() {
 
     document.querySelector('.admin-form').innerHTML = `
         <div class="input-group">
-            <label>Массовое добавление сделок</label>
+            <h3 class="text-[#00ff9d] text-xl mb-4">Массовое добавление сделок</h3>
+            
+            <div class="mode-switcher mb-4">
+                <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
+                <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
+                <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
+            </div>
+
             <textarea id="bulkInput" placeholder="Поддерживаемые форматы:
 
 SPOT:
@@ -100,7 +107,6 @@ AAVE -18%"></textarea>
             <button onclick="processBulkTrades()" class="add-btn">Добавить сделки</button>
         </div>
     `;
-    updateModeBtns('bulk');
 }
 
 // Показ формы одиночного добавления
@@ -108,21 +114,30 @@ function showRegularForm() {
     if (!checkAuth()) return;
 
     document.querySelector('.admin-form').innerHTML = `
-        <div class="input-group">
-            <label>Пара</label>
-            <input type="text" id="pairInput" placeholder="Например: BTC">
+        <div class="form-content">
+            <h3 class="text-[#00ff9d] text-xl mb-4">Одиночное добавление</h3>
+            
+            <div class="mode-switcher mb-4">
+                <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
+                <button onclick="showRegularForm()" class="mode-btn active">Одиночное добавление</button>
+                <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
+            </div>
+
+            <div class="input-group">
+                <label>Пара</label>
+                <input type="text" id="pairInput" placeholder="Например: BTC">
+            </div>
+            <div class="input-group">
+                <label>Результат (%)</label>
+                <input type="number" id="resultInput" step="0.01" placeholder="Например: 55 или -12">
+            </div>
+            <div class="input-group">
+                <label>Кратность (для FUTURES)</label>
+                <input type="text" id="leverageInput" placeholder="Например: 20x">
+            </div>
+            <button onclick="processSingleTrade()" class="add-btn">Добавить сделку</button>
         </div>
-        <div class="input-group">
-            <label>Результат (%)</label>
-            <input type="number" id="resultInput" step="0.01" placeholder="Например: 55 или -12">
-        </div>
-        <div class="input-group">
-            <label>Кратность (для FUTURES)</label>
-            <input type="text" id="leverageInput" placeholder="Например: 20x">
-        </div>
-        <button onclick="processSingleTrade()" class="add-btn">Добавить сделку</button>
     `;
-    updateModeBtns('single');
 }
 
 // Показ списка сделок для управления
@@ -134,10 +149,22 @@ function showTradesList() {
     const category = document.getElementById('categorySelect').value;
     
     const trades = getPeriodData(year, month, category);
-    let html = '<div class="trades-list">';
+    
+    let html = `
+        <div class="trades-manager">
+            <h3 class="text-[#00ff9d] text-xl mb-4">Управление сделками</h3>
+            
+            <div class="mode-switcher mb-4">
+                <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
+                <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
+                <button onclick="showTradesList()" class="mode-btn active">Управление сделками</button>
+            </div>
+
+            <div class="trades-list">
+    `;
     
     if (trades.length === 0) {
-        html += '<p class="text-center">Нет сделок за выбранный период</p>';
+        html += '<p class="text-center text-gray-500">Нет сделок за выбранный период</p>';
     } else {
         trades.forEach((trade) => {
             const resultColor = trade.result > 0 ? '#00ff9d' : '#ff4444';
@@ -149,17 +176,18 @@ function showTradesList() {
                             ${trade.leverage ? ` (${trade.leverage})` : ''}
                         </span>
                     </div>
-                    <div class="trade-actions">
-                        <button onclick="confirmDelete('${trade.id}')" class="delete-btn">Удалить</button>
-                    </div>
+                    <button onclick="confirmDelete('${trade.id}')" class="delete-btn">Удалить</button>
                 </div>
             `;
         });
     }
     
-    html += '</div>';
+    html += `
+            </div>
+        </div>
+    `;
+    
     document.querySelector('.admin-form').innerHTML = html;
-    updateModeBtns('manage');
 }
 
 // Подтверждение удаления
@@ -230,6 +258,7 @@ function processSingleTrade() {
     const category = document.getElementById('categorySelect').value;
 
     if (addTradeData(year, month, category, trade)) {
+        // Очистка формы
         document.getElementById('pairInput').value = '';
         document.getElementById('resultInput').value = '';
         document.getElementById('leverageInput').value = '';
@@ -243,10 +272,9 @@ function processSingleTrade() {
 function updateModeBtns(activeMode) {
     const btns = document.querySelectorAll('.mode-btn');
     btns.forEach(btn => {
+        btn.classList.remove('active');
         if (btn.getAttribute('onclick').includes(activeMode)) {
             btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
         }
     });
 }
@@ -259,10 +287,8 @@ function showNotification(message, type = 'success') {
     
     document.body.appendChild(notification);
 
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 }
 
-// Инициализация
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', initializeAdminPanel);
