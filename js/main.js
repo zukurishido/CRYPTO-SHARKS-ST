@@ -49,16 +49,12 @@ function updateTradesGrid(trades) {
         card.className = `trade-card ${trade.status} fade-in`;
         card.style.animationDelay = `${index * 0.1}s`;
 
-        // Рассчитываем ширину прогресс-бара (максимум 100%)
         const progressWidth = Math.min(Math.abs(trade.result) * 1.5, 100);
-        
-        // Иконка в зависимости от результата
-        const icon = trade.result > 0 ? '↗' : '↘';
         
         card.innerHTML = `
             <div class="trade-header">
                 <div class="trade-pair">
-                    <span class="trade-icon">${icon}</span>
+                    <span class="trade-icon">${trade.result > 0 ? '↗' : '↘'}</span>
                     <span class="pair-name">#${trade.pair}</span>
                 </div>
                 <div class="trade-result">
@@ -72,72 +68,85 @@ function updateTradesGrid(trades) {
                 </div>
             </div>
             ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
+            ${window.isAuthenticated ? `
+                <div class="trade-actions admin-control">
+                    <button onclick="editTrade('${trade.id}')" class="edit-btn">✎</button>
+                    <button onclick="confirmDelete('${trade.id}')" class="delete-btn">✕</button>
+                </div>
+            ` : ''}
         `;
-
-        // Добавляем эффект свечения при наведении
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            card.style.setProperty('--x', `${x}%`);
-            card.style.setProperty('--y', `${y}%`);
-        });
 
         container.appendChild(card);
     });
 }
 
+// Подтверждение удаления
+function confirmDelete(tradeId) {
+    if (!window.isAuthenticated) {
+        showNotification('Доступ запрещен', 'error');
+        return;
+    }
+
+    if (confirm('Удалить эту сделку?')) {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+        const category = document.getElementById('categorySelect').value;
+
+        if (deleteTradeData(year, month, category, tradeId)) {
+            showNotification('Сделка удалена', 'success');
+            updateContent();
+        }
+    }
+}
+
+// Редактирование сделки
+function editTrade(tradeId) {
+    if (!window.isAuthenticated) {
+        showNotification('Доступ запрещен', 'error');
+        return;
+    }
+
+    const year = document.getElementById('yearSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    const category = document.getElementById('categorySelect').value;
+    
+    const trades = getPeriodData(year, month, category);
+    const trade = trades.find(t => t.id === tradeId);
+    
+    if (trade) {
+        const newResult = prompt('Введите новый результат:', trade.result);
+        if (newResult !== null) {
+            const updatedTrade = {
+                ...trade,
+                result: parseFloat(newResult),
+                status: parseFloat(newResult) > 0 ? 'profit' : 'loss'
+            };
+            
+            if (updateTradeData(year, month, category, tradeId, updatedTrade)) {
+                showNotification('Сделка обновлена', 'success');
+                updateContent();
+            }
+        }
+    }
+}
+
 // Инициализация фильтров
 function initializeFilters() {
-    const yearSelect = document.getElementById('yearSelect');
-    const monthSelect = document.getElementById('monthSelect');
-    const categorySelect = document.getElementById('categorySelect');
-
-    // Заполняем актуальным годом
-    const currentYear = new Date().getFullYear();
-    yearSelect.value = currentYear.toString();
-
-    // Заполняем актуальным месяцем
-    const currentMonth = new Date().toLocaleString('ru', { month: 'long' });
-    monthSelect.value = currentMonth;
-
-    // Добавляем обработчики событий
-    [yearSelect, monthSelect, categorySelect].forEach(select => {
-        select.addEventListener('change', () => {
-            updateContent();
-            // Анимация обновления контента
-            const container = document.getElementById('statsContainer');
-            container.classList.add('updating');
-            setTimeout(() => container.classList.remove('updating'), 500);
-        });
+    const selects = ['yearSelect', 'monthSelect', 'categorySelect'];
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.addEventListener('change', updateContent);
+        }
     });
 }
 
-// Вспомогательная функция для форматирования чисел
-function formatNumber(number) {
-    return new Intl.NumberFormat('ru-RU', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-    }).format(number);
-}
-
-// Функция инициализации приложения
+// Инициализация приложения
 function initializeApp() {
     loadData();
     initializeFilters();
     updateContent();
-
-    // Добавляем обработчик для обновления при изменении данных
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'cryptoSharksData') {
-            loadData();
-            updateContent();
-        }
-    });
-
-    // Показываем уведомление о загрузке
-    showNotification('Приложение готово к работе', 'success');
 }
 
-// Запускаем инициализацию при загрузке страницы
+// Запуск при загрузке страницы
 document.addEventListener('DOMContentLoaded', initializeApp);
