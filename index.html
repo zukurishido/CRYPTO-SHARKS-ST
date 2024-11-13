@@ -69,12 +69,13 @@
     <div id="adminPanel" class="admin-panel">
         <div class="admin-header">
             <h2>Админ панель</h2>
-            <div class="admin-controls">
-                <button class="close-btn" id="closeAdmin">✕</button>
+            <div class="admin-controls admin-control">
+                <button id="closeAdmin" class="close-btn">✕</button>
             </div>
         </div>
 
-        <div class="mode-switcher">
+        <!-- Режимы работы (видны только админу) -->
+        <div class="mode-switcher admin-control">
             <button class="mode-btn active" onclick="showBulkInput()">
                 Массовое добавление
             </button>
@@ -86,11 +87,13 @@
             </button>
         </div>
 
+        <!-- Форма админ-панели -->
         <div class="admin-form">
-            <!-- Форма будет добавляться динамически -->
+            <!-- Заполняется через JavaScript -->
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="js/data.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
