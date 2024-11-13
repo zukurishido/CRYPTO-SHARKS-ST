@@ -1,7 +1,4 @@
-.fade-in {
-    animation: fadeIn 0.5s ease forwards;
-}
-
+/* Базовые анимации появления */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -13,13 +10,96 @@
     }
 }
 
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Анимация для прогресс-бара */
+@keyframes fillProgress {
+    from {
+        width: 0;
+        opacity: 0.5;
+    }
+    to {
+        width: var(--progress-width);
+        opacity: 1;
+    }
+}
+
+/* Эффект свечения */
+@keyframes shine {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* Классы анимаций */
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* Анимация для карточек сделок */
+.trade-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.trade-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: translateX(-100%);
+    animation: shine 2s infinite;
+}
+
+/* Прогресс бары */
 .progress-bar {
     position: relative;
     overflow: hidden;
 }
 
-.progress-bar::after {
-    content: '';
+.progress-shine {
     position: absolute;
     top: 0;
     left: 0;
@@ -34,30 +114,92 @@
     animation: shine 2s infinite;
 }
 
-@keyframes shine {
-    from {
-        transform: translateX(-100%);
-    }
+/* Задержки анимации */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Анимации для админ-панели */
+.admin-panel {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-form {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Анимации для кнопок */
+.mode-btn, .edit-btn, .delete-btn {
+    transition: all 0.2s ease;
+}
+
+.mode-btn:hover,
+.edit-btn:hover,
+.delete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 255, 157, 0.2);
+}
+
+/* Анимация для уведомлений */
+.notification {
+    animation: slideInLeft 0.3s ease-out, fadeOut 0.3s ease-out 2.7s forwards;
+}
+
+@keyframes fadeOut {
     to {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+/* Анимация обновления контента */
+.updating {
+    animation: flash 0.3s ease-out;
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Анимация для статистики */
+.stat-box {
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+}
+
+/* Анимация для удаления */
+.trade-item.removing {
+    animation: slideOut 0.3s ease-out forwards;
+}
+
+@keyframes slideOut {
+    to {
+        opacity: 0;
         transform: translateX(100%);
     }
 }
 
-.trade-card {
-    animation: slideIn 0.5s ease forwards;
+/* Hover эффекты */
+.trade-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.1);
+    transition: all 0.3s ease;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.trade-card:hover .progress-bar {
+    filter: brightness(1.2);
+    transition: all 0.3s ease;
 }
-
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
