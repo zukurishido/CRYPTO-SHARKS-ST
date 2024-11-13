@@ -6,12 +6,13 @@
 }
 
 body {
+    font-family: system-ui, -apple-system, sans-serif;
     background-color: var(--dark);
     color: white;
-    font-family: system-ui, -apple-system, sans-serif;
     min-height: 100vh;
 }
 
+/* Header */
 .header {
     display: flex;
     justify-content: space-between;
@@ -21,8 +22,8 @@ body {
 
 .title {
     font-size: 2.5rem;
-    color: var(--primary);
     font-weight: bold;
+    color: var(--primary);
 }
 
 .admin-btn {
@@ -41,26 +42,28 @@ body {
     transform: translateY(-2px);
 }
 
+/* Filters */
 .filters {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
-    margin-bottom: 2rem;
     background: var(--card);
     padding: 1.5rem;
     border-radius: 1rem;
+    margin-bottom: 2rem;
 }
 
 .filter-select {
-    background: var(--dark);
-    color: white;
-    padding: 0.75rem;
-    border: 1px solid var(--primary);
-    border-radius: 0.5rem;
     width: 100%;
+    padding: 0.75rem;
+    background: var(--dark);
+    border: 1px solid var(--primary);
+    color: white;
+    border-radius: 0.5rem;
     cursor: pointer;
 }
 
+/* Stats */
 .summary-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -68,19 +71,34 @@ body {
     margin-bottom: 2rem;
 }
 
-.stats-container {
+.stat-box {
     background: var(--card);
-    border-radius: 1rem;
     padding: 1.5rem;
+    border-radius: 1rem;
 }
 
+.stat-box h3 {
+    font-size: 1.1rem;
+    color: #8892a0;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.profit { color: var(--primary); }
+.loss { color: #ff4d4d; }
+
+/* Trades Grid */
 .trades-grid {
     display: grid;
     gap: 1rem;
 }
 
 .trade-card {
-    background: var(--dark);
+    background: var(--card);
     border-radius: 0.5rem;
     padding: 1rem;
     position: relative;
@@ -94,18 +112,16 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.profit .trade-result {
-    color: var(--primary);
-}
-
-.loss .trade-result {
-    color: #ff4444;
+.trade-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .progress-container {
+    height: 4px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 0.25rem;
-    height: 0.25rem;
+    border-radius: 2px;
     overflow: hidden;
 }
 
@@ -114,13 +130,8 @@ body {
     transition: width 1s ease-in-out;
 }
 
-.profit .progress-bar {
-    background: var(--primary);
-}
-
-.loss .progress-bar {
-    background: #ff4444;
-}
+.profit .progress-bar { background: var(--primary); }
+.loss .progress-bar { background: #ff4d4d; }
 
 @media (max-width: 768px) {
     .filters,
