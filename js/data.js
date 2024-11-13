@@ -1,7 +1,15 @@
 // Структура данных
-let data = {};
+let data = {
+    '2024': {
+        'Январь': {
+            'SPOT': { trades: [] },
+            'FUTURES': { trades: [] },
+            'DeFi': { trades: [] }
+        }
+    }
+};
 
-// Загрузка данных
+// Загрузка данных из localStorage
 function loadData() {
     try {
         const savedData = localStorage.getItem('cryptoSharksData');
@@ -14,7 +22,7 @@ function loadData() {
     }
 }
 
-// Сохранение данных
+// Сохранение данных в localStorage
 function saveData() {
     try {
         localStorage.setItem('cryptoSharksData', JSON.stringify(data));
@@ -36,7 +44,7 @@ function parseTrades(text) {
         // Очистка строки от лишних символов
         const cleanLine = line.trim().replace(/["""'']/g, '');
 
-        // Различные форматы категорий
+        // Определение категории
         if (cleanLine.match(/DEFI|ДЕФИ|DEFI:|ДЕФИ:|DEFI🚀|DEF|DEPOSIT/i)) {
             currentCategory = 'DeFi';
             return;
@@ -48,7 +56,7 @@ function parseTrades(text) {
             return;
         }
 
-        // Массив паттернов для различных форматов записи
+        // Различные паттерны для сделок
         const patterns = [
             // Стандартный формат: #BTC +50% или #BTC -30%
             /[#]?(\w+)\s*([-+])\s*(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
@@ -64,9 +72,6 @@ function parseTrades(text) {
             
             // Формат без пробелов: BTC+50% или BTC-30%
             /(\w+)([-+])(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
-            
-            // Формат с разными разделителями
-            /(\w+)[^\w\s]*\s*([-+])?(\d+\.?\d*)%\s*(?:\((\d+)x\)?)?/i,
             
             // Простой формат: BTC 50%
             /(\w+)\s+(\d+\.?\d*)%/i
@@ -135,28 +140,25 @@ function getPeriodData(year, month, category) {
     return data[year]?.[month]?.[category]?.trades || [];
 }
 
-// Удаление сделки
-function deleteTradeData(year, month, category, tradeId) {
-    if (!window.isAuthenticated) {
-        showNotification('Требуется авторизация', 'error');
-        return false;
-    }
-
+// Удаление сделки (исправленная версия)
+function deleteTradeData(year, month, category, index) {
     try {
-        if (!data[year]?.[month]?.[category]) return false;
-
-        const trades = data[year][month][category].trades;
-        const initialLength = trades.length;
-        
-        data[year][month][category].trades = trades.filter(t => t.id !== tradeId);
-        
-        if (initialLength === data[year][month][category].trades.length) {
+        if (!data[year] || !data[year][month] || !data[year][month][category]) {
             return false;
         }
 
-        return saveData();
+        const trades = data[year][month][category].trades;
+        
+        if (index >= 0 && index < trades.length) {
+            trades.splice(index, 1);
+            saveData();
+            return true;
+        }
+        
+        return false;
     } catch (error) {
-        console.error('Ошибка удаления:', error);
+        console.error('Ошибка удаления данных:', error);
+        showNotification('Ошибка при удалении', 'error');
         return false;
     }
 }
@@ -200,5 +202,5 @@ function calculateStats(trades) {
     }
 }
 
-// Инициализация
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', loadData);
