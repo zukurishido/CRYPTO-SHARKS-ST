@@ -15,15 +15,15 @@ function updateContent() {
 function updateSummaryStats(stats) {
     const summaryStats = document.getElementById('summaryStats');
     summaryStats.innerHTML = `
-        <div class="stat-box fade-in">
+        <div class="stat-box fade-in delay-1">
             <h3>Всего сделок</h3>
             <div class="stat-value">${stats.totalTrades}</div>
         </div>
-        <div class="stat-box fade-in">
+        <div class="stat-box fade-in delay-2">
             <h3>Прибыльных</h3>
             <div class="stat-value profit">+${stats.totalProfit}%</div>
         </div>
-        <div class="stat-box fade-in">
+        <div class="stat-box fade-in delay-3">
             <h3>Убыточных</h3>
             <div class="stat-value loss">-${stats.totalLoss}%</div>
         </div>
@@ -44,22 +44,30 @@ function updateTradesGrid(trades) {
         return;
     }
 
-    trades.forEach((trade, index) => {
+    // Сортировка сделок: сначала прибыльные, потом убыточные
+    const sortedTrades = [...trades].sort((a, b) => b.result - a.result);
+
+    sortedTrades.forEach((trade, index) => {
         const card = document.createElement('div');
         card.className = `trade-card ${trade.status} fade-in`;
         card.style.animationDelay = `${index * 0.1}s`;
 
+        // Расчет ширины прогресс-бара (максимум 100%)
         const progressWidth = Math.min(Math.abs(trade.result) * 1.5, 100);
+        
+        // Иконка в зависимости от результата
+        const icon = trade.result > 0 ? '↗' : '↘';
+        const resultColor = trade.result > 0 ? 'var(--profit)' : 'var(--loss)';
         
         card.innerHTML = `
             <div class="trade-header">
                 <div class="trade-pair">
-                    <span class="trade-icon">${trade.result > 0 ? '↗' : '↘'}</span>
+                    <span class="trade-icon" style="color: ${resultColor}">${icon}</span>
                     <span class="pair-name">#${trade.pair}</span>
                 </div>
-                <div class="trade-result">
+                <div class="trade-result" style="color: ${resultColor}">
                     ${trade.result > 0 ? '+' : ''}${trade.result}%
-                    ${trade.leverage ? ` <span class="leverage">(${trade.leverage})</span>` : ''}
+                    ${trade.leverage ? `<span class="leverage">(${trade.leverage})</span>` : ''}
                 </div>
             </div>
             <div class="progress-container">
@@ -67,7 +75,17 @@ function updateTradesGrid(trades) {
                     <div class="progress-shine"></div>
                 </div>
             </div>
+            ${trade.comment ? `<div class="trade-comment">${trade.comment}</div>` : ''}
         `;
+
+        // Добавляем эффект свечения при наведении
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--x', `${x}%`);
+            card.style.setProperty('--y', `${y}%`);
+        });
 
         container.appendChild(card);
     });
@@ -75,43 +93,42 @@ function updateTradesGrid(trades) {
 
 // Инициализация фильтров
 function initializeFilters() {
-    // Установка текущего года по умолчанию
+    // Установка текущего года и месяца
+    const currentDate = new Date();
+    
     const yearSelect = document.getElementById('yearSelect');
-    if (yearSelect) {
-        const currentYear = new Date().getFullYear().toString();
-        yearSelect.value = currentYear;
-    }
-
-    // Установка текущего месяца по умолчанию
     const monthSelect = document.getElementById('monthSelect');
-    if (monthSelect) {
-        const months = [
-            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
-        const currentMonth = months[new Date().getMonth()];
-        monthSelect.value = currentMonth;
-    }
+    
+    const currentYear = currentDate.getFullYear().toString();
+    const months = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    const currentMonth = months[currentDate.getMonth()];
 
-    // Добавление обработчиков событий для фильтров
-    const selects = document.querySelectorAll('.filter-select');
-    selects.forEach(select => {
+    // Установка значений по умолчанию
+    yearSelect.value = currentYear;
+    monthSelect.value = currentMonth;
+
+    // Добавление обработчиков событий
+    document.querySelectorAll('.filter-select').forEach(select => {
         select.addEventListener('change', () => {
+            // Анимация обновления контента
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.classList.add('updating');
+            
+            // Обновление данных
             updateContent();
             
-            // Добавляем анимацию обновления
-            const statsContainer = document.getElementById('statsContainer');
-            if (statsContainer) {
-                statsContainer.classList.add('updating');
-                setTimeout(() => {
-                    statsContainer.classList.remove('updating');
-                }, 500);
-            }
+            // Удаление класса анимации
+            setTimeout(() => {
+                statsContainer.classList.remove('updating');
+            }, 500);
         });
     });
 }
 
-// Вспомогательная функция для форматирования чисел
+// Вспомогательная функция форматирования чисел
 function formatNumber(number) {
     return new Intl.NumberFormat('ru-RU', {
         maximumFractionDigits: 2,
@@ -119,13 +136,23 @@ function formatNumber(number) {
     }).format(number);
 }
 
+// Проверка состояния аутентификации при загрузке
+function checkAuthState() {
+    if (window.isAuthenticated) {
+        document.body.classList.add('is-admin');
+    } else {
+        document.body.classList.remove('is-admin');
+    }
+}
+
 // Инициализация приложения
 function initializeApp() {
     loadData();
     initializeFilters();
     updateContent();
+    checkAuthState();
 
-    // Добавляем обработчик для обновления при изменении данных
+    // Обновление при изменении данных в других вкладках
     window.addEventListener('storage', (e) => {
         if (e.key === 'cryptoSharksData') {
             loadData();
@@ -134,5 +161,5 @@ function initializeApp() {
     });
 }
 
-// Запуск приложения при загрузке страницы
+// Запуск приложения
 document.addEventListener('DOMContentLoaded', initializeApp);
