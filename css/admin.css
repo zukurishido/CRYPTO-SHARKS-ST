@@ -1,17 +1,18 @@
-/* Основные стили админ-панели */
+/* Админ панель */
 .admin-panel {
     position: fixed;
     right: -400px;
     top: 0;
-    width: 400px;
+    width: min(400px, 100%);
     height: 100vh;
     background: rgba(15, 23, 42, 0.98);
     backdrop-filter: blur(10px);
     padding: 1.5rem;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-fast);
     z-index: 1000;
     overflow-y: auto;
     border-left: 1px solid rgba(0, 255, 157, 0.2);
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .admin-panel.visible {
@@ -23,15 +24,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid rgba(0, 255, 157, 0.2);
 }
 
 .admin-header h2 {
-    color: #00ff9d;
+    color: var(--primary);
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .close-btn {
@@ -41,85 +42,92 @@
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
-    transition: color 0.3s ease;
+    transition: color var(--transition-fast);
+    opacity: 0.8;
 }
 
 .close-btn:hover {
-    color: #00ff9d;
+    color: var(--primary);
+    opacity: 1;
 }
 
-/* Режимы работы */
+/* Переключатели режимов */
 .mode-switcher {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
     background: rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    border-radius: 8px;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
 }
 
 .mode-btn {
-    padding: 10px;
+    padding: 0.75rem;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast);
     font-size: 0.9rem;
     text-align: center;
 }
 
 .mode-btn:hover {
     background: rgba(0, 255, 157, 0.1);
-    border-color: #00ff9d;
+    border-color: var(--primary);
+    transform: translateY(-1px);
 }
 
 .mode-btn.active {
-    background: #00ff9d;
+    background: var(--primary);
     color: black;
+    font-weight: 500;
     border-color: transparent;
 }
 
 /* Формы */
 .admin-form {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
 }
 
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
 }
 
 .input-group label {
     display: block;
-    color: #00ff9d;
-    margin-bottom: 8px;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
 
-.admin-form input,
-.admin-form textarea {
+.admin-input,
+.admin-textarea,
+.admin-select {
     width: 100%;
-    padding: 12px;
+    padding: 0.75rem;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem;
     font-size: 0.9rem;
+    transition: all var(--transition-fast);
 }
 
-.admin-form input:focus,
-.admin-form textarea:focus {
+.admin-input:focus,
+.admin-textarea:focus,
+.admin-select:focus {
     outline: none;
-    border-color: #00ff9d;
+    border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
 }
 
-.admin-form textarea {
+.admin-textarea {
     min-height: 200px;
     font-family: monospace;
     resize: vertical;
@@ -127,21 +135,22 @@
 }
 
 /* Кнопки */
-.add-btn {
+.add-btn,
+.action-btn {
     width: 100%;
-    padding: 12px;
-    background: #00ff9d;
+    padding: 0.75rem;
+    background: var(--primary);
     color: black;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    transition: all var(--transition-fast);
 }
 
-.add-btn:hover {
-    background: #00cc7d;
+.add-btn:hover,
+.action-btn:hover {
+    background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 255, 157, 0.2);
 }
@@ -150,39 +159,34 @@
 .trades-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 0.75rem;
 }
 
 .trade-item {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(0, 255, 157, 0.2);
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: var(--radius-sm);
+    padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: all var(--transition-fast);
 }
 
-.trade-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.trade-actions {
-    display: flex;
-    gap: 8px;
+.trade-item:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--primary);
+    transform: translateY(-2px);
 }
 
 .delete-btn {
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     background: rgba(255, 68, 68, 0.1);
     color: #ff4444;
     border: 1px solid rgba(255, 68, 68, 0.2);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast);
     font-size: 0.9rem;
 }
 
@@ -192,41 +196,56 @@
 }
 
 /* Уведомления */
-.notification {
+.notifications-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    color: white;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     z-index: 1100;
-    animation: slideIn 0.3s ease;
+}
+
+.notification {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-sm);
+    color: white;
+    background: var(--dark);
+    box-shadow: var(--shadow-lg);
     font-size: 0.9rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
 }
 
 .notification.success {
-    background: #00ff9d;
+    background: var(--primary);
     color: black;
 }
 
 .notification.error {
-    background: #ff4444;
+    background: var(--loss);
 }
 
-/* Анимации */
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
+/* Адаптивность */
+@media (max-width: 500px) {
+    .admin-panel {
+        width: 100%;
+        right: -100%;
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
+
+    .admin-panel.visible {
+        transform: translateX(-100%);
+    }
+
+    .mode-switcher {
+        grid-template-columns: 1fr;
+    }
+
+    .notification {
+        max-width: calc(100% - 2rem);
     }
 }
 
-/* Кастомный скроллбар */
+/* Скроллбар админ-панели */
 .admin-panel::-webkit-scrollbar {
     width: 6px;
 }
@@ -242,66 +261,4 @@
 
 .admin-panel::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 255, 157, 0.5);
-}
-
-/* Остальные стили */
-.form-content {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Адаптивность */
-@media (max-width: 500px) {
-    .admin-panel {
-        width: 100%;
-        right: -100%;
-    }
-}
-
-/* Стили для полей ввода в темной теме */
-.admin-input {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 255, 157, 0.2);
-    color: white;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-}
-
-.admin-input:focus {
-    outline: none;
-    border-color: #00ff9d;
-    box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.1);
-}
-
-/* Стили для текста-подсказки */
-::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Стили для заблокированных элементов */
-.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Стили для режима модерации */
-.admin-only {
-    display: none;
-}
-
-.is-admin .admin-only {
-    display: block;
 }
