@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
+    <!-- Подключаем Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container mx-auto px-4 py-6">
@@ -64,26 +66,11 @@
         <div class="admin-form"></div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-
-        // Конфигурация Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQyMvaZ4RkcdjTzyW1MH3727JHO7T5_qw",
-            authDomain: "crypto-sharks-f0214.firebaseapp.com",
-            projectId: "crypto-sharks-f0214",
-            storageBucket: "crypto-sharks-f0214.firebasestorage.app",
-            messagingSenderId: "898499149708",
-            appId: "1:898499149708:web:95e05ab41f41cd33aaa0a9"
-        };
-
-        // Инициализация Firebase
-        const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);
-        window.auth = getAuth(app);
+    <!-- Инициализация Supabase -->
+    <script>
+        const SUPABASE_URL = 'https://okdb1hqrlmotgzxbyjz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rZGIxaHFybG1vdGd6eGJ5anoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDQxMTQ2MSwiZXhwIjoyMDE1OTg3NDYxfQ.ey3hbGct013IUzI1NiIsInR5cCI6IkpXVC';
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
 
     <!-- Скрипты приложения -->
