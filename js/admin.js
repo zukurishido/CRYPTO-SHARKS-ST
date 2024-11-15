@@ -1,5 +1,17 @@
 import { loadData, addTradeData, deleteTradeData, parseTrades } from './data.js';
 
+// Экспорт функций в глобальное пространство имен
+window.showLoginForm = showLoginForm;
+window.toggleAdminPanel = toggleAdminPanel;
+window.login = login;
+window.logout = logout;
+window.showBulkInput = showBulkInput;
+window.showRegularForm = showRegularForm;
+window.showTradesList = showTradesList;
+window.processBulkTrades = processBulkTrades;
+window.processSingleTrade = processSingleTrade;
+window.confirmDelete = confirmDelete;
+
 // Состояние админ-панели
 let isAdminPanelVisible = false;
 
@@ -16,23 +28,16 @@ async function checkAuth() {
 
 // Инициализация админ-панели
 export function initializeAdminPanel() {
-    const adminButton = document.getElementById('adminButton');
-    const closeAdmin = document.getElementById('closeAdmin');
-
-    if (adminButton && closeAdmin) {
-        adminButton.addEventListener('click', async () => {
-            const { data: { user } } = await window.supabase.auth.getUser();
-            if (!user) {
-                showLoginForm();
-            } else {
-                toggleAdminPanel();
+    window.supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            document.body.classList.add('is-admin');
+            if (isAdminPanelVisible) {
+                showBulkInput();
             }
-        });
-
-        closeAdmin.addEventListener('click', () => {
-            toggleAdminPanel();
-        });
-    }
+        } else {
+            document.body.classList.remove('is-admin');
+        }
+    });
 }
 
 // Переключение видимости админ-панели
@@ -42,12 +47,6 @@ function toggleAdminPanel() {
     
     if (adminPanel) {
         adminPanel.classList.toggle('visible');
-        
-        if (isAdminPanelVisible) {
-            checkAuth().then(isAuth => {
-                if (isAuth) showBulkInput();
-            });
-        }
     }
 }
 
@@ -76,7 +75,7 @@ function showLoginForm() {
 }
 
 // Вход в админ-панель
-window.login = async function() {
+async function login() {
     const emailInput = document.getElementById('emailInput');
     const passwordInput = document.getElementById('passwordInput');
     
@@ -100,7 +99,7 @@ window.login = async function() {
 }
 
 // Выход
-window.logout = async function() {
+async function logout() {
     try {
         await window.supabase.auth.signOut();
         document.body.classList.remove('is-admin');
@@ -113,7 +112,7 @@ window.logout = async function() {
 }
 
 // Показ формы массового добавления
-window.showBulkInput = async function() {
+async function showBulkInput() {
     if (!await checkAuth()) return;
 
     const form = document.querySelector('.admin-form');
@@ -151,7 +150,7 @@ AAVE -18%"></textarea>
 }
 
 // Показ формы одиночного добавления
-window.showRegularForm = async function() {
+async function showRegularForm() {
     if (!await checkAuth()) return;
 
     const form = document.querySelector('.admin-form');
@@ -182,7 +181,7 @@ window.showRegularForm = async function() {
 }
 
 // Показ списка сделок
-window.showTradesList = async function() {
+async function showTradesList() {
     if (!await checkAuth()) return;
 
     const year = document.getElementById('yearSelect').value;
@@ -230,7 +229,7 @@ window.showTradesList = async function() {
 }
 
 // Обработка массового добавления
-window.processBulkTrades = async function() {
+async function processBulkTrades() {
     if (!await checkAuth()) return;
 
     const bulkInput = document.getElementById('bulkInput');
@@ -257,7 +256,7 @@ window.processBulkTrades = async function() {
 }
 
 // Обработка одиночного добавления
-window.processSingleTrade = async function() {
+async function processSingleTrade() {
     if (!await checkAuth()) return;
 
     const pair = document.getElementById('pairInput').value;
@@ -292,7 +291,7 @@ window.processSingleTrade = async function() {
 }
 
 // Подтверждение удаления
-window.confirmDelete = async function(tradeId) {
+async function confirmDelete(tradeId) {
     if (!await checkAuth()) return;
 
     if (confirm('Удалить эту сделку?')) {
