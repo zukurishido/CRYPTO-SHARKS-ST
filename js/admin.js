@@ -1,22 +1,12 @@
-import { 
-    signInWithEmailAndPassword,
-    signOut 
-} from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-
-import {
-    loadData,
-    addTradeData,
-    deleteTradeData,
-    parseTrades,
-    calculateStats
-} from './data.js';
+import { loadData, addTradeData, deleteTradeData, parseTrades } from './data.js';
 
 // Состояние админ-панели
 let isAdminPanelVisible = false;
 
 // Проверка авторизации
-function checkAuth() {
-    if (!window.auth.currentUser) {
+async function checkAuth() {
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) {
         showNotification('Требуется авторизация', 'error');
         showLoginForm();
         return false;
@@ -30,8 +20,9 @@ export function initializeAdminPanel() {
     const closeAdmin = document.getElementById('closeAdmin');
 
     if (adminButton && closeAdmin) {
-        adminButton.addEventListener('click', () => {
-            if (!window.auth.currentUser) {
+        adminButton.addEventListener('click', async () => {
+            const { data: { user } } = await window.supabase.auth.getUser();
+            if (!user) {
                 showLoginForm();
             } else {
                 toggleAdminPanel();
@@ -42,18 +33,6 @@ export function initializeAdminPanel() {
             toggleAdminPanel();
         });
     }
-
-    // Слушатель изменения состояния аутентификации
-    window.auth.onAuthStateChanged((user) => {
-        if (user) {
-            document.body.classList.add('is-admin');
-            if (isAdminPanelVisible) {
-                showBulkInput();
-            }
-        } else {
-            document.body.classList.remove('is-admin');
-        }
-    });
 }
 
 // Переключение видимости админ-панели
@@ -64,8 +43,10 @@ function toggleAdminPanel() {
     if (adminPanel) {
         adminPanel.classList.toggle('visible');
         
-        if (isAdminPanelVisible && window.auth.currentUser) {
-            showBulkInput();
+        if (isAdminPanelVisible) {
+            checkAuth().then(isAuth => {
+                if (isAuth) showBulkInput();
+            });
         }
     }
 }
@@ -78,9 +59,9 @@ function showLoginForm() {
             <div class="input-group">
                 <input type="email" 
                        id="emailInput" 
-                       placeholder="Email"
                        value="admin@cryptosharks.com"
-                       class="admin-input">
+                       class="admin-input"
+                       readonly>
                 <input type="password" 
                        id="passwordInput" 
                        placeholder="Пароль" 
@@ -102,7 +83,14 @@ window.login = async function() {
     if (!emailInput || !passwordInput) return;
 
     try {
-        await signInWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value);
+        const { data, error } = await window.supabase.auth.signInWithPassword({
+            email: emailInput.value,
+            password: passwordInput.value
+        });
+
+        if (error) throw error;
+
+        document.body.classList.add('is-admin');
         showNotification('Успешный вход', 'success');
         showBulkInput();
     } catch (error) {
@@ -111,10 +99,11 @@ window.login = async function() {
     }
 }
 
-// Выход из админ-панели
+// Выход
 window.logout = async function() {
     try {
-        await signOut(window.auth);
+        await window.supabase.auth.signOut();
+        document.body.classList.remove('is-admin');
         showNotification('Выход выполнен', 'success');
         toggleAdminPanel();
     } catch (error) {
@@ -124,8 +113,8 @@ window.logout = async function() {
 }
 
 // Показ формы массового добавления
-function showBulkInput() {
-    if (!checkAuth()) return;
+window.showBulkInput = async function() {
+    if (!await checkAuth()) return;
 
     const form = document.querySelector('.admin-form');
     if (form) {
@@ -162,8 +151,8 @@ AAVE -18%"></textarea>
 }
 
 // Показ формы одиночного добавления
-function showRegularForm() {
-    if (!checkAuth()) return;
+window.showRegularForm = async function() {
+    if (!await checkAuth()) return;
 
     const form = document.querySelector('.admin-form');
     if (form) {
@@ -193,8 +182,8 @@ function showRegularForm() {
 }
 
 // Показ списка сделок
-async function showTradesList() {
-    if (!checkAuth()) return;
+window.showTradesList = async function() {
+    if (!await checkAuth()) return;
 
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
@@ -242,7 +231,7 @@ async function showTradesList() {
 
 // Обработка массового добавления
 window.processBulkTrades = async function() {
-    if (!checkAuth()) return;
+    if (!await checkAuth()) return;
 
     const bulkInput = document.getElementById('bulkInput');
     if (!bulkInput) return;
@@ -263,13 +252,13 @@ window.processBulkTrades = async function() {
     if (success) {
         bulkInput.value = '';
         showNotification(`Добавлено ${trades.length} сделок`, 'success');
-        updateContent();
+        window.updateContent();
     }
 }
 
 // Обработка одиночного добавления
 window.processSingleTrade = async function() {
-    if (!checkAuth()) return;
+    if (!await checkAuth()) return;
 
     const pair = document.getElementById('pairInput').value;
     const result = parseFloat(document.getElementById('resultInput').value);
@@ -284,8 +273,7 @@ window.processSingleTrade = async function() {
         pair: pair.toUpperCase(),
         result: result,
         leverage: leverage ? leverage : '',
-        status: result > 0 ? 'profit' : 'loss',
-        timestamp: new Date().toISOString()
+        status: result > 0 ? 'profit' : 'loss'
     };
 
     const year = document.getElementById('yearSelect').value;
@@ -299,20 +287,20 @@ window.processSingleTrade = async function() {
         document.getElementById('leverageInput').value = '';
         
         showNotification('Сделка добавлена', 'success');
-        updateContent();
+        window.updateContent();
     }
 }
 
 // Подтверждение удаления
 window.confirmDelete = async function(tradeId) {
-    if (!checkAuth()) return;
+    if (!await checkAuth()) return;
 
     if (confirm('Удалить эту сделку?')) {
         const success = await deleteTradeData(tradeId);
         if (success) {
             showNotification('Сделка удалена', 'success');
             showTradesList();
-            updateContent();
+            window.updateContent();
         } else {
             showNotification('Ошибка при удалении', 'error');
         }
@@ -328,8 +316,3 @@ export function showNotification(message, type = 'success') {
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
 }
-
-// Экспорт для использования в других модулях
-window.showBulkInput = showBulkInput;
-window.showRegularForm = showRegularForm;
-window.showTradesList = showTradesList;
