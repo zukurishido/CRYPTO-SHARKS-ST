@@ -1,10 +1,22 @@
+import { 
+    signInWithEmailAndPassword,
+    signOut 
+} from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+
+import {
+    loadData,
+    addTradeData,
+    deleteTradeData,
+    parseTrades,
+    calculateStats
+} from './data.js';
+
 // Состояние админ-панели
-window.isAuthenticated = false;
 let isAdminPanelVisible = false;
 
 // Проверка авторизации
 function checkAuth() {
-    if (!window.isAuthenticated) {
+    if (!window.auth.currentUser) {
         showNotification('Требуется авторизация', 'error');
         showLoginForm();
         return false;
@@ -13,13 +25,13 @@ function checkAuth() {
 }
 
 // Инициализация админ-панели
-function initializeAdminPanel() {
+export function initializeAdminPanel() {
     const adminButton = document.getElementById('adminButton');
     const closeAdmin = document.getElementById('closeAdmin');
 
     if (adminButton && closeAdmin) {
         adminButton.addEventListener('click', () => {
-            if (!window.isAuthenticated) {
+            if (!window.auth.currentUser) {
                 showLoginForm();
             } else {
                 toggleAdminPanel();
@@ -30,6 +42,18 @@ function initializeAdminPanel() {
             toggleAdminPanel();
         });
     }
+
+    // Слушатель изменения состояния аутентификации
+    window.auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.body.classList.add('is-admin');
+            if (isAdminPanelVisible) {
+                showBulkInput();
+            }
+        } else {
+            document.body.classList.remove('is-admin');
+        }
+    });
 }
 
 // Переключение видимости админ-панели
@@ -40,7 +64,7 @@ function toggleAdminPanel() {
     if (adminPanel) {
         adminPanel.classList.toggle('visible');
         
-        if (isAdminPanelVisible && window.isAuthenticated) {
+        if (isAdminPanelVisible && window.auth.currentUser) {
             showBulkInput();
         }
     }
@@ -52,12 +76,17 @@ function showLoginForm() {
     if (form) {
         form.innerHTML = `
             <div class="input-group">
+                <input type="email" 
+                       id="emailInput" 
+                       placeholder="Email"
+                       value="admin@cryptosharks.com"
+                       class="admin-input">
                 <input type="password" 
                        id="passwordInput" 
-                       placeholder="Введите пароль" 
+                       placeholder="Пароль" 
                        class="admin-input"
-                       onkeypress="if(event.key === 'Enter') login()">
-                <button onclick="login()" class="add-btn">Войти</button>
+                       onkeypress="if(event.key === 'Enter') window.login()">
+                <button onclick="window.login()" class="add-btn">Войти</button>
             </div>
         `;
         
@@ -66,21 +95,31 @@ function showLoginForm() {
 }
 
 // Вход в админ-панель
-async function login() {
+window.login = async function() {
+    const emailInput = document.getElementById('emailInput');
     const passwordInput = document.getElementById('passwordInput');
-    if (!passwordInput) return;
-
-    const password = passwordInput.value;
-    const validHash = window.githubConfig.adminHash;
     
-    if (btoa(password) === validHash) {
-        window.isAuthenticated = true;
-        window.githubConfig.token = atob(window.githubConfig.encryptedToken);
-        document.body.classList.add('is-admin');
-        showBulkInput();
+    if (!emailInput || !passwordInput) return;
+
+    try {
+        await signInWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value);
         showNotification('Успешный вход', 'success');
-    } else {
-        showNotification('Неверный пароль', 'error');
+        showBulkInput();
+    } catch (error) {
+        console.error('Ошибка входа:', error);
+        showNotification('Неверные учетные данные', 'error');
+    }
+}
+
+// Выход из админ-панели
+window.logout = async function() {
+    try {
+        await signOut(window.auth);
+        showNotification('Выход выполнен', 'success');
+        toggleAdminPanel();
+    } catch (error) {
+        console.error('Ошибка выхода:', error);
+        showNotification('Ошибка при выходе', 'error');
     }
 }
 
@@ -95,6 +134,7 @@ function showBulkInput() {
                 <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
+                <button onclick="window.logout()" class="mode-btn">Выйти</button>
             </div>
 
             <div class="input-group">
@@ -132,6 +172,7 @@ function showRegularForm() {
                 <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn active">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
+                <button onclick="window.logout()" class="mode-btn">Выйти</button>
             </div>
 
             <div class="input-group">
@@ -152,14 +193,14 @@ function showRegularForm() {
 }
 
 // Показ списка сделок
-function showTradesList() {
+async function showTradesList() {
     if (!checkAuth()) return;
 
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
     
-    const trades = getPeriodData(year, month, category);
+    const trades = await loadData(year, month, category);
     
     const form = document.querySelector('.admin-form');
     if (form) {
@@ -168,6 +209,7 @@ function showTradesList() {
                 <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn active">Управление сделками</button>
+                <button onclick="window.logout()" class="mode-btn">Выйти</button>
             </div>
         `;
         
@@ -176,7 +218,7 @@ function showTradesList() {
         if (trades.length === 0) {
             html += '<p class="text-center text-gray-500">Нет сделок за выбранный период</p>';
         } else {
-            trades.forEach((trade, index) => {
+            trades.forEach(trade => {
                 const resultColor = trade.result > 0 ? '#00ff9d' : '#ff4444';
                 const resultText = `${trade.result > 0 ? '+' : ''}${trade.result}%${trade.leverage ? ` (${trade.leverage})` : ''}`;
                 
@@ -185,7 +227,7 @@ function showTradesList() {
                         <div class="trade-content">
                             <span style="color: ${resultColor}">#${trade.pair} ${resultText}</span>
                         </div>
-                        <button onclick="confirmDelete('${year}', '${month}', '${category}', ${index})" class="delete-btn">
+                        <button onclick="confirmDelete('${trade.id}')" class="delete-btn">
                             Удалить
                         </button>
                     </div>
@@ -199,7 +241,7 @@ function showTradesList() {
 }
 
 // Обработка массового добавления
-async function processBulkTrades() {
+window.processBulkTrades = async function() {
     if (!checkAuth()) return;
 
     const bulkInput = document.getElementById('bulkInput');
@@ -226,7 +268,7 @@ async function processBulkTrades() {
 }
 
 // Обработка одиночного добавления
-async function processSingleTrade() {
+window.processSingleTrade = async function() {
     if (!checkAuth()) return;
 
     const pair = document.getElementById('pairInput').value;
@@ -239,7 +281,6 @@ async function processSingleTrade() {
     }
 
     const trade = {
-        id: Date.now() + Math.random(),
         pair: pair.toUpperCase(),
         result: result,
         leverage: leverage ? leverage : '',
@@ -263,11 +304,11 @@ async function processSingleTrade() {
 }
 
 // Подтверждение удаления
-async function confirmDelete(year, month, category, index) {
+window.confirmDelete = async function(tradeId) {
     if (!checkAuth()) return;
 
     if (confirm('Удалить эту сделку?')) {
-        const success = await deleteTradeData(year, month, category, index);
+        const success = await deleteTradeData(tradeId);
         if (success) {
             showNotification('Сделка удалена', 'success');
             showTradesList();
@@ -279,7 +320,7 @@ async function confirmDelete(year, month, category, index) {
 }
 
 // Показ уведомлений
-function showNotification(message, type = 'success') {
+export function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
@@ -288,5 +329,7 @@ function showNotification(message, type = 'success') {
     setTimeout(() => notification.remove(), 3000);
 }
 
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', initializeAdminPanel);
+// Экспорт для использования в других модулях
+window.showBulkInput = showBulkInput;
+window.showRegularForm = showRegularForm;
+window.showTradesList = showTradesList;
