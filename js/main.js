@@ -1,10 +1,13 @@
+import { loadData, calculateStats } from './data.js';
+import { initializeAdminPanel } from './admin.js';
+
 // Обновление контента
 async function updateContent() {
     const year = document.getElementById('yearSelect').value;
     const month = document.getElementById('monthSelect').value;
     const category = document.getElementById('categorySelect').value;
 
-    const trades = getPeriodData(year, month, category);
+    const trades = await loadData(year, month, category);
     const stats = calculateStats(trades);
 
     updateSummaryStats(stats);
@@ -121,28 +124,11 @@ function initializeFilters() {
     }
 }
 
-// Форматирование чисел
-function formatNumber(number) {
-    return new Intl.NumberFormat('ru-RU', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-    }).format(number);
-}
-
 // Инициализация приложения
 async function initializeApp() {
-    await loadData();
+    initializeAdminPanel();
     initializeFilters();
-    updateContent();
-
-    // Обработчик для синхронизации между вкладками
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'cryptoSharksData') {
-            loadData().then(() => {
-                updateContent();
-            });
-        }
-    });
+    await updateContent();
 }
 
 // Запуск приложения
@@ -150,8 +136,10 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 // Автоматическое обновление каждые 30 секунд
 setInterval(async () => {
-    if (!document.hidden) {  // Обновляем только если вкладка активна
-        await loadData();
-        updateContent();
+    if (!document.hidden) {
+        await updateContent();
     }
 }, 30000);
+
+// Экспорт для использования в других модулях
+window.updateContent = updateContent;
