@@ -1,40 +1,16 @@
-/* Переменные */
 :root {
-    /* Основные цвета */
     --primary: #00ff9d;
     --primary-dark: #00cc7d;
     --dark: #0f172a;
     --card: #1e293b;
-    
-    /* Статусы */
     --profit: #00ff9d;
     --loss: #ff4444;
-    
-    /* Тени */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
-    /* Скругления */
-    --radius-sm: 0.5rem;
-    --radius-md: 0.75rem;
-    --radius-lg: 1rem;
-    
-    /* Transitions */
-    --transition-fast: 0.3s ease;
-    --transition-normal: 0.5s ease;
 }
 
-/* Reset и базовые стили */
-*, *::before, *::after {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-html {
-    font-size: 16px;
-    scroll-behavior: smooth;
 }
 
 body {
@@ -42,16 +18,12 @@ body {
     background-color: var(--dark);
     color: white;
     min-height: 100vh;
-    line-height: 1.5;
-    overflow-x: hidden;
 }
 
-/* Контейнер */
 .container {
-    width: 100%;
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 0 1rem;
 }
 
 /* Header */
@@ -59,13 +31,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0;
+    padding: 1rem 0;
     margin-bottom: 2rem;
 }
 
 .title {
-    font-size: clamp(2rem, 5vw, 2.5rem);
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: bold;
     color: var(--primary);
     text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
 }
@@ -74,27 +46,26 @@ body {
     background: var(--primary);
     color: black;
     padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
+    border-radius: 0.5rem;
+    font-weight: bold;
     border: none;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.3s ease;
 }
 
 .admin-btn:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 }
 
-/* Фильтры */
+/* Filters */
 .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     background: var(--card);
     padding: 1.5rem;
-    border-radius: var(--radius-lg);
+    border-radius: 1rem;
     margin-bottom: 2rem;
 }
 
@@ -104,26 +75,19 @@ body {
     background: var(--dark);
     border: 1px solid rgba(0, 255, 157, 0.2);
     color: white;
-    border-radius: var(--radius-sm);
+    border-radius: 0.5rem;
     cursor: pointer;
-    transition: border-color var(--transition-fast);
-    appearance: none;
-    background-image: url("data:image/svg+xml,...");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1em;
+    transition: all 0.3s ease;
 }
 
-.filter-select:hover,
-.filter-select:focus {
+.filter-select:hover {
     border-color: var(--primary);
-    outline: none;
 }
 
-/* Статистика */
+/* Stats */
 .summary-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     margin-bottom: 2rem;
 }
@@ -131,29 +95,38 @@ body {
 .stat-box {
     background: var(--card);
     padding: 1.5rem;
-    border-radius: var(--radius-lg);
-    transition: transform var(--transition-fast);
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 255, 157, 0.1);
+    transition: all 0.3s ease;
 }
 
 .stat-box:hover {
+    border-color: var(--primary);
     transform: translateY(-2px);
 }
 
 .stat-box h3 {
     color: #8892a0;
     margin-bottom: 0.5rem;
-    font-size: 0.875rem;
 }
 
 .stat-value {
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: bold;
 }
 
-/* Сетка сделок */
+.profit {
+    color: var(--profit);
+}
+
+.loss {
+    color: var(--loss);
+}
+
+/* Trades Grid */
 .stats-container {
     background: var(--card);
-    border-radius: var(--radius-lg);
+    border-radius: 1rem;
     padding: 1.5rem;
 }
 
@@ -163,21 +136,20 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
-/* Карточки сделок */
+/* Trade Cards */
 .trade-card {
     background: rgba(15, 23, 42, 0.6);
-    border-radius: var(--radius-md);
+    border-radius: 0.75rem;
     padding: 1.25rem;
     position: relative;
+    overflow: hidden;
     border: 1px solid rgba(0, 255, 157, 0.1);
-    transition: all var(--transition-fast);
-    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 .trade-card:hover {
     transform: translateY(-2px);
     border-color: var(--primary);
-    box-shadow: var(--shadow-lg);
 }
 
 .trade-header {
@@ -194,31 +166,50 @@ body {
     font-weight: 500;
 }
 
-/* Утилиты */
-.profit-text { color: var(--profit); }
-.loss-text { color: var(--loss); }
-.text-center { text-align: center; }
-.text-gray-500 { color: #8892a0; }
-
-/* Медиа запросы */
-@media (max-width: 768px) {
-    .filters {
-        grid-template-columns: 1fr;
-    }
-    
-    .summary-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .trades-grid {
-        grid-template-columns: 1fr;
-    }
+/* Progress Bar */
+.progress-container {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-top: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
 }
 
-/* Скроллбар */
+.progress-bar {
+    height: 100%;
+    transition: width 1s ease-in-out;
+    width: 100%;
+    position: relative;
+}
+
+.progress-bar.profit {
+    background: var(--profit);
+}
+
+.progress-bar.loss {
+    background: var(--loss);
+}
+
+.profit-text {
+    color: var(--profit);
+}
+
+.loss-text {
+    color: var(--loss);
+}
+
+/* Utils */
+.text-center {
+    text-align: center;
+}
+
+.text-gray-500 {
+    color: #8892a0;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -232,4 +223,46 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 255, 157, 0.5);
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    z-index: 1100;
+    animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+    background: var(--primary);
+}
+
+.notification.error {
+    background: var(--loss);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .filters,
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .trade-card {
+        margin-bottom: 1rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
 }
