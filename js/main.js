@@ -129,10 +129,13 @@ async function initializeApp() {
     initializeAdminPanel();
     initializeFilters();
     await updateContent();
-}
 
-// Запуск приложения
-document.addEventListener('DOMContentLoaded', initializeApp);
+    // Проверка авторизации при загрузке
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (user) {
+        document.body.classList.add('is-admin');
+    }
+}
 
 // Автоматическое обновление каждые 30 секунд
 setInterval(async () => {
@@ -143,3 +146,6 @@ setInterval(async () => {
 
 // Экспорт для использования в других модулях
 window.updateContent = updateContent;
+
+// Запуск приложения
+document.addEventListener('DOMContentLoaded', initializeApp);
