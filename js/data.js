@@ -1,14 +1,3 @@
-import { 
-    collection, 
-    doc, 
-    getDocs, 
-    setDoc, 
-    deleteDoc, 
-    query, 
-    where, 
-    orderBy 
-} from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-
 // Константы
 export const YEARS = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
 export const MONTHS = [
@@ -17,61 +6,43 @@ export const MONTHS = [
 ];
 export const CATEGORIES = ['SPOT', 'FUTURES', 'DeFi'];
 
-// Загрузка данных из Firestore
+// Загрузка данных из Supabase
 export async function loadData(year, month, category) {
     try {
-        const tradesRef = collection(window.db, 'trades');
-        const q = query(
-            tradesRef,
-            where('year', '==', year),
-            where('month', '==', month),
-            where('category', '==', category),
-            orderBy('timestamp', 'desc')
-        );
+        const { data, error } = await window.supabase
+            .from('trades')
+            .select('*')
+            .eq('year', year)
+            .eq('month', month)
+            .eq('category', category)
+            .order('timestamp', { ascending: false });
 
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        if (error) throw error;
+        return data || [];
     } catch (error) {
         console.error('Ошибка загрузки данных:', error);
         return [];
     }
 }
 
-// Сохранение данных в Firestore
-export async function saveData(year, month, category, trades) {
-    try {
-        const batch = window.db.batch();
-        
-        trades.forEach(trade => {
-            const tradeRef = doc(collection(window.db, 'trades'));
-            batch.set(tradeRef, {
-                ...trade,
-                year,
-                month,
-                category,
-                timestamp: new Date().toISOString()
-            });
-        });
-
-        await batch.commit();
-        return true;
-    } catch (error) {
-        console.error('Ошибка сохранения:', error);
-        return false;
-    }
-}
-
 // Добавление сделок
 export async function addTradeData(year, month, category, trades) {
     try {
-        if (Array.isArray(trades)) {
-            return await saveData(year, month, category, trades);
-        } else {
-            return await saveData(year, month, category, [trades]);
-        }
+        const tradesData = Array.isArray(trades) ? trades : [trades];
+        const formattedTrades = tradesData.map(trade => ({
+            ...trade,
+            year,
+            month,
+            category,
+            timestamp: new Date().toISOString()
+        }));
+
+        const { error } = await window.supabase
+            .from('trades')
+            .insert(formattedTrades);
+
+        if (error) throw error;
+        return true;
     } catch (error) {
         console.error('Ошибка добавления:', error);
         return false;
@@ -81,7 +52,12 @@ export async function addTradeData(year, month, category, trades) {
 // Удаление сделки
 export async function deleteTradeData(tradeId) {
     try {
-        await deleteDoc(doc(window.db, 'trades', tradeId));
+        const { error } = await window.supabase
+            .from('trades')
+            .delete()
+            .eq('id', tradeId);
+
+        if (error) throw error;
         return true;
     } catch (error) {
         console.error('Ошибка удаления:', error);
@@ -99,10 +75,10 @@ export function calculateStats(trades) {
         
         trades.forEach(trade => {
             if (trade.result > 0) {
-                totalProfit += trade.result;
+                totalProfit += parseFloat(trade.result);
                 profitCount++;
             } else if (trade.result < 0) {
-                totalLoss += Math.abs(trade.result);
+                totalLoss += Math.abs(parseFloat(trade.result));
                 lossCount++;
             }
         });
@@ -170,12 +146,10 @@ export function parseTrades(text) {
                 const cleanSymbol = symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
                 
                 trades.push({
-                    id: Date.now() + Math.random(),
                     pair: cleanSymbol,
                     result: result,
                     leverage: leverage || '',
                     status: result > 0 ? 'profit' : 'loss',
-                    category: currentCategory,
                     timestamp: new Date().toISOString()
                 });
                 break;
