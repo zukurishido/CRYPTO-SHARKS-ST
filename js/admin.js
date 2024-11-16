@@ -1,19 +1,15 @@
-import { loadData, addTradeData, deleteTradeData, parseTrades } from './data.js';
-
-// Экспорт функций в глобальное пространство имен
-window.showLoginForm = showLoginForm;
-window.toggleAdminPanel = toggleAdminPanel;
-window.login = login;
-window.logout = logout;
-window.showBulkInput = showBulkInput;
-window.showRegularForm = showRegularForm;
-window.showTradesList = showTradesList;
-window.processBulkTrades = processBulkTrades;
-window.processSingleTrade = processSingleTrade;
-window.confirmDelete = confirmDelete;
-
 // Состояние админ-панели
 let isAdminPanelVisible = false;
+
+// Показ уведомлений
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
 
 // Проверка авторизации
 async function checkAuth() {
@@ -24,20 +20,6 @@ async function checkAuth() {
         return false;
     }
     return true;
-}
-
-// Инициализация админ-панели
-export function initializeAdminPanel() {
-    window.supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            document.body.classList.add('is-admin');
-            if (isAdminPanelVisible) {
-                showBulkInput();
-            }
-        } else {
-            document.body.classList.remove('is-admin');
-        }
-    });
 }
 
 // Переключение видимости админ-панели
@@ -65,8 +47,8 @@ function showLoginForm() {
                        id="passwordInput" 
                        placeholder="Пароль" 
                        class="admin-input"
-                       onkeypress="if(event.key === 'Enter') window.login()">
-                <button onclick="window.login()" class="add-btn">Войти</button>
+                       onkeypress="if(event.key === 'Enter') login()">
+                <button onclick="login()" class="add-btn">Войти</button>
             </div>
         `;
         
@@ -122,7 +104,7 @@ async function showBulkInput() {
                 <button onclick="showBulkInput()" class="mode-btn active">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
-                <button onclick="window.logout()" class="mode-btn">Выйти</button>
+                <button onclick="logout()" class="mode-btn">Выйти</button>
             </div>
 
             <div class="input-group">
@@ -160,7 +142,7 @@ async function showRegularForm() {
                 <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn active">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn">Управление сделками</button>
-                <button onclick="window.logout()" class="mode-btn">Выйти</button>
+                <button onclick="logout()" class="mode-btn">Выйти</button>
             </div>
 
             <div class="input-group">
@@ -197,7 +179,7 @@ async function showTradesList() {
                 <button onclick="showBulkInput()" class="mode-btn">Массовое добавление</button>
                 <button onclick="showRegularForm()" class="mode-btn">Одиночное добавление</button>
                 <button onclick="showTradesList()" class="mode-btn active">Управление сделками</button>
-                <button onclick="window.logout()" class="mode-btn">Выйти</button>
+                <button onclick="logout()" class="mode-btn">Выйти</button>
             </div>
         `;
         
@@ -228,90 +210,26 @@ async function showTradesList() {
     }
 }
 
-// Обработка массового добавления
-async function processBulkTrades() {
-    if (!await checkAuth()) return;
+// Добавляем все функции в глобальную область видимости
+window.showLoginForm = showLoginForm;
+window.toggleAdminPanel = toggleAdminPanel;
+window.login = login;
+window.logout = logout;
+window.showBulkInput = showBulkInput;
+window.showRegularForm = showRegularForm;
+window.showTradesList = showTradesList;
+window.processBulkTrades = processBulkTrades;
+window.processSingleTrade = processSingleTrade;
+window.confirmDelete = confirmDelete;
 
-    const bulkInput = document.getElementById('bulkInput');
-    if (!bulkInput) return;
-
-    const text = bulkInput.value;
-    const trades = parseTrades(text);
-    
-    if (trades.length === 0) {
-        showNotification('Не удалось распознать сделки', 'error');
-        return;
-    }
-
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-
-    const success = await addTradeData(year, month, category, trades);
-    if (success) {
-        bulkInput.value = '';
-        showNotification(`Добавлено ${trades.length} сделок`, 'success');
-        window.updateContent();
-    }
-}
-
-// Обработка одиночного добавления
-async function processSingleTrade() {
-    if (!await checkAuth()) return;
-
-    const pair = document.getElementById('pairInput').value;
-    const result = parseFloat(document.getElementById('resultInput').value);
-    const leverage = document.getElementById('leverageInput').value;
-
-    if (!pair || isNaN(result)) {
-        showNotification('Заполните обязательные поля', 'error');
-        return;
-    }
-
-    const trade = {
-        pair: pair.toUpperCase(),
-        result: result,
-        leverage: leverage ? leverage : '',
-        status: result > 0 ? 'profit' : 'loss'
-    };
-
-    const year = document.getElementById('yearSelect').value;
-    const month = document.getElementById('monthSelect').value;
-    const category = document.getElementById('categorySelect').value;
-
-    const success = await addTradeData(year, month, category, trade);
-    if (success) {
-        document.getElementById('pairInput').value = '';
-        document.getElementById('resultInput').value = '';
-        document.getElementById('leverageInput').value = '';
-        
-        showNotification('Сделка добавлена', 'success');
-        window.updateContent();
-    }
-}
-
-// Подтверждение удаления
-async function confirmDelete(tradeId) {
-    if (!await checkAuth()) return;
-
-    if (confirm('Удалить эту сделку?')) {
-        const success = await deleteTradeData(tradeId);
-        if (success) {
-            showNotification('Сделка удалена', 'success');
-            showTradesList();
-            window.updateContent();
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем статус авторизации
+    window.supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            document.body.classList.add('is-admin');
         } else {
-            showNotification('Ошибка при удалении', 'error');
+            document.body.classList.remove('is-admin');
         }
-    }
-}
-
-// Показ уведомлений
-export function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
-}
+    });
+});
