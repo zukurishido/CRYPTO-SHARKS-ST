@@ -7,14 +7,12 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/animations.css">
-    <!-- Подключаем Supabase -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container mx-auto px-4 py-6">
         <div class="header">
             <h1 id="crypto-sharks" class="title">CRYPTO SHARKS</h1>
-            <button onclick="window.showLoginForm()" id="adminButton" class="admin-btn">Админ панель</button>
+            <button onclick="showLoginForm()" id="adminButton" class="admin-btn">Админ панель</button>
         </div>
 
         <div id="filters" class="filters">
@@ -61,11 +59,14 @@
     <div id="adminPanel" class="admin-panel">
         <div class="admin-header">
             <h2>Админ панель</h2>
-            <button id="closeAdmin" class="close-btn" onclick="window.toggleAdminPanel()">✕</button>
+            <button id="closeAdmin" class="close-btn" onclick="toggleAdminPanel()">✕</button>
         </div>
         <div class="admin-form"></div>
     </div>
 
+    <!-- Подключаем Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
     <!-- Инициализация Supabase -->
     <script>
         const SUPABASE_URL = 'https://okdb1hqrlmotgzxbyjz.supabase.co';
@@ -74,8 +75,8 @@
     </script>
 
     <!-- Скрипты приложения -->
-    <script src="js/data.js" type="module"></script>
-    <script src="js/admin.js" type="module"></script>
-    <script src="js/main.js" type="module"></script>
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
